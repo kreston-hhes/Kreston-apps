@@ -16,6 +16,28 @@ class CheckDivision
 
         $user = auth()->user();
 
+        if (!$user) {
+            abort(403, 'Unauthorized');
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | BYPASS USER
+        |--------------------------------------------------------------------------
+        */
+
+        $bypassUsers = config('access.bypass_user_ids');
+
+        if (in_array($user->id, $bypassUsers)) {
+            return $next($request);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CHECK DIVISION
+        |--------------------------------------------------------------------------
+        */
+
         $userDivision = $user?->employee?->division;
 
         if (!in_array($userDivision, $divisions)) {

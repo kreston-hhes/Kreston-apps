@@ -66,7 +66,10 @@ class EmployeePolicy
 
     public function manage(User $user)
 {
-    // Hanya boleh jika Position adalah Manager
-    return in_array($user->employee->position, ['Manager', 'Supervisor']);
+    // privilege position yang diizinkan untuk mengelola fitur tertentu, misalnya: Manager, Supervisor
+   return in_array(
+    $user->employee->position,
+    config('access.approval_positions')
+);
 }
 }

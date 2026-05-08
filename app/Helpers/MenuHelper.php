@@ -117,18 +117,39 @@ class MenuHelper
      * Filter menu berdasarkan division user
      */
     public static function filterMenuByDivision($menus, $division)
-    {
-        return collect($menus)->filter(function ($menu) use ($division) {
+{
+    $user = Auth::user();
 
-            // Jika tidak ada restriction
-            if (!isset($menu['allowed_divisions'])) {
-                return true;
-            }
+    // Ambil bypass user ids dari ENV
+    $bypassUserIds = array_map(
+        'intval',
+        explode(',', env('BYPASS_USER_IDS', ''))
+    );
 
-            return in_array($division, $menu['allowed_divisions']);
+    return collect($menus)->filter(function ($menu) use (
+        $division,
+        $user,
+        $bypassUserIds
+    ) {
 
-        })->values()->toArray();
-    }
+        // Jika menu tidak punya restriction
+        if (!isset($menu['allowed_divisions'])) {
+            return true;
+        }
+
+        // Jika user termasuk bypass
+        if (in_array($user->id, $bypassUserIds)) {
+            return true;
+        }
+
+        // Cek division
+        return in_array(
+            $division,
+            $menu['allowed_divisions']
+        );
+
+    })->values()->toArray();
+}
 
     public static function getMenuGroups()
     {
