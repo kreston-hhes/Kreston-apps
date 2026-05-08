@@ -63,6 +63,13 @@
                             @endforeach
                         </select>
 
+                                 <select name="partnership" onchange="this.form.submit()" class="px-3 py-2 border border-gray-200 rounded-lg text-sm dark:bg-gray-900 dark:border-white/[0.05]">
+                            <option value="">All Teams</option>
+                            @foreach($partnerships as $partnership)
+                                <option value="{{ $partnership }}" {{ request('partnership') == $partnership ? 'selected' : '' }}>{{ $partnership }}</option>
+                            @endforeach
+                        </select>
+
                         <select name="division" onchange="this.form.submit()" class="px-3 py-2 border border-gray-200 rounded-lg text-sm dark:bg-gray-900 dark:border-white/[0.05]">
                             <option value="">All Divisions</option>
                             @foreach($divisions as $div)
@@ -74,10 +81,11 @@
                             <a href="{{ route('employees.index') }}" class="text-sm text-red-500 hover:text-red-700">Clear</a>
                         @endif
                     </form>
-
+@can('manage', App\Models\Employee::class)
                     <button class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
                         Add New
                     </button>
+@endcan
                 </div>
             </div>
         </div>
@@ -99,7 +107,7 @@
                             </a>
                         </th>
                         <th class="px-6 py-3 text-start text-theme-xs font-medium text-gray-500">Division</th>
-                        <th class="px-6 py-3 text-start text-theme-xs font-medium text-gray-500">Partnership</th>
+                        <th class="px-6 py-3 text-start text-theme-xs font-medium text-gray-500">Teams</th>
                         <th class="px-6 py-3 text-start text-theme-xs font-medium text-gray-500">Manager</th>
                         <th class="px-6 py-3 text-start">
                             <a href="{{ request()->fullUrlWithQuery(['sort' => 'date_of_entry', 'direction' => request('direction') === 'asc' ? 'desc' : 'asc']) }}" class="flex items-center gap-1 text-theme-xs font-medium text-gray-500 hover:text-blue-600">

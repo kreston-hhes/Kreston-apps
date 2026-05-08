@@ -34,6 +34,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // 3. Atur redirect untuk user yang sudah login tapi mencoba akses halaman guest
         $middleware->redirectUsersTo('/dashboard');
 
+
+        // 4. Middleware custom untuk cek division (opsional, bisa digunakan untuk fitur khusus)
+        $middleware->alias([
+        'division' => \App\Http\Middleware\CheckDivision::class,
+    ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

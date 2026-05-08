@@ -1,38 +1,50 @@
 <?php
 
 namespace App\Helpers;
+use Illuminate\Support\Facades\Auth;
 
 class MenuHelper
 {
     public static function getMainNavItems()
     {
-        return [
+         $user = Auth::user();
+         $division = $user->employee->division ?? null;
+       $menus = [
             [
                 'icon' => 'dashboard',
                 'name' => 'Dashboard',
                 'path' => '/',
             ],
-           
+
             [
                 'name' => 'HR',
                 'icon' => 'hr',
+
+                // hanya division tertentu yang bisa lihat
+                'allowed_divisions' => ['HR', 'IT'],
+
                 'subItems' => [
                     ['name' => 'Announcment', 'path' => '/#'],
                     ['name' => 'Employee', 'path' => '/employee'],
                 ],
             ],
-          
+
             [
                 'name' => 'Administrator',
                 'icon' => 'admin',
+
+                // hanya IT yang bisa lihat
+                'allowed_divisions' => ['IT'],
+
                 'subItems' => [
                     ['name' => 'Privilege', 'path' => '/#'],
                     ['name' => 'Reference content', 'path' => '/#'],
                     ['name' => 'Log', 'path' => '/#'],
                 ],
             ],
-           
         ];
+
+        return self::filterMenuByDivision($menus, $division);
     }
 
     public static function getOthersItems()
@@ -99,6 +111,23 @@ class MenuHelper
                 ],
             ],
         ];
+    }
+
+      /**
+     * Filter menu berdasarkan division user
+     */
+    public static function filterMenuByDivision($menus, $division)
+    {
+        return collect($menus)->filter(function ($menu) use ($division) {
+
+            // Jika tidak ada restriction
+            if (!isset($menu['allowed_divisions'])) {
+                return true;
+            }
+
+            return in_array($division, $menu['allowed_divisions']);
+
+        })->values()->toArray();
     }
 
     public static function getMenuGroups()

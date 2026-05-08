@@ -22,12 +22,17 @@ class EmployeeController extends Controller
         });
     }
 
-    // 3. Logika Filter Position & Division
+    // 3. Logika Filter Position & Division & partnership   
     if ($request->filled('position')) {
         $query->where('position', $request->position);
     }
     if ($request->filled('division')) {
         $query->where('division', $request->division);
+    }
+    if ($request->filled('partnership')) {
+        $query->whereHas('partnership', function($q) use ($request) {
+            $q->where('name', $request->partnership);
+        });
     }
 
    // 4. Logika Sorting
@@ -81,17 +86,24 @@ class EmployeeController extends Controller
     // Ambil daftar unik untuk dropdown filter di view
     $positions = Employee::distinct()->whereNotNull('position')->pluck('position');
     $divisions = Employee::distinct()->whereNotNull('division')->pluck('division');
-
+    $partnerships = Employee::distinct()->whereNotNull('partnership_id')->pluck('partnership_id')->map(function ($id) {
+        $partnership = \App\Models\Partnership::find($id);
+        return $partnership ? $partnership->name : null;
+    })->filter()->unique();
     return view('pages.hr.employee', [
         'tableData' => $tableData,
         'employees' => $employees,
         'positions' => $positions,
-        'divisions' => $divisions
+        'divisions' => $divisions,
+        'partnerships' => $partnerships
     ]);
 }
 
     public function destroy($id)
 {
+    // Cek apakah user punya akses 'manage'
+    $this->authorize('manage', Employee::class);
+    
     try {
         $employee = Employee::findOrFail($id);
         $employee->delete();

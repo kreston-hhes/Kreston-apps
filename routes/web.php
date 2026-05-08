@@ -25,6 +25,24 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+/*
+    |--------------------------------------------------------------------------
+    | HR MENU
+    |--------------------------------------------------------------------------
+    | Hanya division HR dan IT
+    */
+
+    Route::middleware(['division:HR,IT'])->group(function () {
+
+        Route::get('/employee', [EmployeeController::class, 'index'])
+            ->name('employees.index');
+
+        Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])
+            ->name('employees.destroy');
+
+    });
+
 });
 
 // 3. Redirect Root (Opsional)
@@ -32,15 +50,15 @@ Route::get('/', function () {
     return Auth::check() ? redirect()->route('dashboard') : redirect()->route('login');
 });
 
-Route::get('/employee', [EmployeeController::class, 'index'])->name('employees.index');
-Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
 
 
 
 
 
 
-//batas
+
+
+//batas fitur nanti akan di hapus jika sudah tidak dibutuhkan
 
 // calender pages
 Route::get('/calendar', function () {

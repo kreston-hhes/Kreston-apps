@@ -33,6 +33,7 @@ class EmployeeFactory extends Factory
               'division' => fake()->randomElement(['IT', 'HR', 'Finance', 'Marketing']),
               'date_of_entry' => fake()->date(),
               'release_date' => null,
+                'partnership_id' => fake()->randomElement([1, 2, 3, 4, null]), // Asumsikan ada beberapa partnership dengan ID ini
               'status' => fake()->randomElement(['active', 'inactive']),
         ];
     }
