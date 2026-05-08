@@ -101,9 +101,7 @@ class EmployeeController extends Controller
 
     public function destroy($id)
 {
-    // Cek apakah user punya akses 'manage'
-    $this->authorize('manage', Employee::class);
-    
+  
     try {
         $employee = Employee::findOrFail($id);
         $employee->delete();
