@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EmployeeController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -31,11 +32,15 @@ Route::get('/', function () {
     return Auth::check() ? redirect()->route('dashboard') : redirect()->route('login');
 });
 
-// employee pages
-Route::get('/employee', function () {
-    return view('pages.hr.employee', ['title' => 'Employee']);
-})->name('employee');
+Route::get('/employee', [EmployeeController::class, 'index'])->name('employees.index');
+Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
 
+
+
+
+
+
+//batas
 
 // calender pages
 Route::get('/calendar', function () {
