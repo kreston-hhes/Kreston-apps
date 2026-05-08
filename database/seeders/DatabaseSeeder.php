@@ -15,6 +15,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // User::factory(10)->create();
+        $partnerships = \App\Models\Partnership::factory(10)->create();
+        $employees = \App\Models\Employee::factory(50)->create([
+            'partnership_id' => $partnerships->random()->id,
+        ]);
 
 User::create([
             'first_name' => 'Administrator',
