@@ -6,11 +6,13 @@
         <div class="space-y-6">
             <x-form.form-elements.default-inputs />
             <x-form.form-elements.select-inputs />
+            <x-form.form-elements.select2-inputs />
             <x-form.form-elements.text-area-inputs />
-            <x-form.form-elements.input-states />
+            
         </div>
         <div class="space-y-6">
-            <x-form.form-elements.input-group />
+        <x-form.form-elements.input-states />    
+        <x-form.form-elements.input-group />
             <x-form.form-elements.file-input-example />
             <x-form.form-elements.checkbox-component />
             <x-form.form-elements.radio-buttons />

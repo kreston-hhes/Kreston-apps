@@ -11,6 +11,7 @@ class Partnership extends Model
 
     protected $fillable = [
         'nik',
+        'code',
         'name',
         'email',
         'phone',

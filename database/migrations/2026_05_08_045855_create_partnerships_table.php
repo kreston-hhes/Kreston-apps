@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('partnerships', function (Blueprint $table) {
             $table->id();
             $table->string('nik')->unique();
+            $table->string('code')->unique()->nullable();
             $table->string('name');
             $table->string('email')->unique();
             $table->string('phone')->nullable();

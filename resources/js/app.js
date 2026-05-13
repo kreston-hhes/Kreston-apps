@@ -2,6 +2,12 @@ import "./bootstrap";
 import Alpine from "alpinejs";
 import ApexCharts from "apexcharts";
 
+import $ from 'jquery';
+window.$ = window.jQuery = $;
+
+import select2 from 'select2';
+select2(window, $);
+
 // flatpickr
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
@@ -59,6 +65,14 @@ document.addEventListener("DOMContentLoaded", () => {
         import("./components/calendar-init").then((module) =>
             module.calendarInit(),
         );
+    }
+
+    if (window.$ && $.fn.select2) {
+        $(".my-select2").select2({
+            placeholder: "Pilih data",
+            allowClear: true,
+            width: '100%',
+        });
     }
 });
 

@@ -3,6 +3,8 @@ layer(base);
 @import "prismjs/themes/prism.min.css";
 @import "tailwindcss";
 
+@import 'select2/dist/css/select2.min.css';
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
@@ -199,6 +201,56 @@ layer(base);
     body {
         @apply relative font-normal font-outfit z-1 bg-gray-50;
     }
+}
+
+/* Container Utama Select2 */
+.select2-container--default .select2-selection--single {
+    @apply !h-11 !w-full !rounded-lg !border !border-gray-300 !bg-transparent !text-sm !shadow-theme-xs !transition-all;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Dark Mode Support */
+.dark .select2-container--default .select2-selection--single {
+    @apply !border-gray-700 !bg-gray-900 !text-white/90;
+}
+
+/* Teks di dalam Select */
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    @apply !px-4 !text-gray-800 dark:!text-white/90;
+    line-height: 44px !important; /* Properti CSS murni tetap pakai !important di akhir */
+}
+
+/* Placeholder */
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    @apply !text-gray-400 dark:!text-white/30;
+}
+
+/* Sembunyikan Arrow Bawaan */
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    display: none !important;
+}
+
+/* State Focus */
+.select2-container--default.select2-container--focus .select2-selection--single {
+    @apply !border-brand-300 !ring-3 !ring-brand-500/10 dark:!border-brand-800;
+    outline: none !important;
+}
+
+/* Dropdown Menu */
+.select2-dropdown {
+    @apply !border-gray-300 !bg-white !shadow-lg dark:!border-gray-700 dark:!bg-gray-900;
+    border-radius: 0.5rem !important;
+}
+
+/* Styling Opsi */
+.select2-results__option {
+    @apply !px-4 !py-2 !text-sm !text-gray-700 dark:!text-gray-400;
+}
+
+/* Hover & Selected */
+.select2-results__option--highlighted[aria-selected] {
+    @apply !bg-brand-500 !text-white;
 }
 
 @utility menu-item {

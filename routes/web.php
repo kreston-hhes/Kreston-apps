@@ -24,6 +24,11 @@ Route::middleware('auth')->group(function () {
         return view('pages.dashboard.dashboard', ['title' => 'Dashboard']);
     })->name('dashboard');
 
+  //Route to Ticket Support
+    Route::get('/ticket-support', function () {
+        return view('pages.ticket-support', ['title' => 'Ticket Support']);
+    })->name('ticket-support');  
+
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 /*

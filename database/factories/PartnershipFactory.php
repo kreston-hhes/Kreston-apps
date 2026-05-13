@@ -22,6 +22,7 @@ class PartnershipFactory extends Factory
     {
         return [
         'nik' => fake()->unique()->numerify('KR-####'),
+        'code' => fake()->unique()->numerify('P-####'),
         'name' => fake()->name(),
         'email' => fake()->unique()->safeEmail(),
         'phone' => fake()->phoneNumber(),
