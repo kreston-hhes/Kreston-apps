@@ -14,16 +14,13 @@ return new class extends Migration
         Schema::create('partnerships', function (Blueprint $table) {
             $table->id();
             $table->string('nik')->unique();
-            $table->string('code')->unique()->nullable();
+            $table->string('code')->nullable();
             $table->string('name');
             $table->string('email')->unique();
             $table->string('phone')->nullable();
-            $table->string('address')->nullable();
             $table->enum('gender', ['male', 'female']);
-            $table->date('birth_date')->nullable();
-            $table->string('position');
             $table->string('division');
-            $table->date('date_of_entry');
+            $table->date('date_of_entry')->nullable();
             $table->date('release_date')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
