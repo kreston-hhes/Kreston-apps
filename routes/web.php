@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,12 +25,35 @@ Route::middleware('auth')->group(function () {
         return view('pages.dashboard.dashboard', ['title' => 'Dashboard']);
     })->name('dashboard');
 
-  //Route to Ticket Support
-    Route::get('/ticket-support', function () {
-        return view('pages.ticket-support', ['title' => 'Ticket Support']);
-    })->name('ticket-support');  
+  
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    /*
+    |--------------------------------------------------------------------------
+    | IT MENU
+    |--------------------------------------------------------------------------
+    | Hanya division IT
+    */
+
+    Route::middleware(['division:IT'])->group(function () {
+        // Tambahkan rute khusus untuk IT di sini
+       //Route to Ticket Support
+    Route::get('/ticket-support', [DashboardController::class, 'showTicketSupport'])->name('ticket-support');  
+
+    //submit ticket support
+    Route::post('/ticket-support', [DashboardController::class, 'submitTicket'])->name('ticket-support.submit');
+
+    // Start a ticket (open -> in_progress)
+    Route::post('/ticket-support/{id}/start', [DashboardController::class, 'startTicket'])->name('ticket-start');
+
+    // Close a ticket (in_progress -> closed)
+    Route::post('/ticket-support/{id}/close', [DashboardController::class, 'closeTicket'])->name('ticket-close');
+
+
+
+    });
+
 
 /*
     |--------------------------------------------------------------------------

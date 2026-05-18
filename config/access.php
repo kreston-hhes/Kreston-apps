@@ -11,5 +11,9 @@ return [
         'BYPASS_USER_IDS',
         ''
     )),
+  'notif_it' => explode(',', env(
+        'NOTIF_IT',
+        'IT'
+    )),
 
 ];

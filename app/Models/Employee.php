@@ -44,4 +44,10 @@ class Employee extends Model
     {
         return $this->hasMany(Employee::class, 'manager_id');
     }
+
+    //Relasi ke Tickets
+    public function tickets()
+    {
+        return $this->hasMany(Tickets::class, 'id_employee');
+    }
 }

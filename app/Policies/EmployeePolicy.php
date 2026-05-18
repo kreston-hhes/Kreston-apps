@@ -72,4 +72,13 @@ class EmployeePolicy
     config('access.approval_positions')
 );
 }
+
+    public function notif_it(User $user)
+{
+    // privilege notification untuk division IT
+   return in_array(
+    $user->employee->division,
+    config('access.notif_it')
+);
+}
 }

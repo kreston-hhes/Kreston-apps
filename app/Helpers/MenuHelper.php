@@ -19,11 +19,13 @@ class MenuHelper
                 'icon' => 'ticket',
                 'name' => 'Ticket Support',
                 'path' => '/ticket-support',
+                  'allowed_divisions' => ['IT'],
             ],
 
             [
-                'name' => 'HR',
+                
                 'icon' => 'hr',
+                'name' => 'HR',
 
                 // hanya division tertentu yang bisa lihat
                 'allowed_divisions' => ['HR', 'IT'],

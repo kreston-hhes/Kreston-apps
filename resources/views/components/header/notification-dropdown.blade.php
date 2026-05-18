@@ -1,7 +1,19 @@
 {{-- Notification Dropdown Component --}}
+@php
+    use App\Models\Tickets;
+    use Carbon\Carbon;
+
+    $notifications_tickets = Tickets::with('employee')
+        ->where('status', '!=', 'closed')
+        ->latest('request_date')
+        ->limit(6)
+        ->get();
+
+    $hasNotifications = $notifications_tickets->isNotEmpty();
+@endphp
 <div class="relative" x-data="{
     dropdownOpen: false,
-    notifying: true,
+    notifying: {{ $hasNotifications ? 'true' : 'false' }},
     toggleDropdown() {
         this.dropdownOpen = !this.dropdownOpen;
         this.notifying = false;
@@ -95,127 +107,56 @@
             </button>
         </div>
 
-        <!-- Notification List -->
+
+    @can('notif_it', App\Models\Employee::class)
+
+   
+
+        <!-- Notification List For IT -->
         <ul class="flex flex-col h-auto overflow-y-auto custom-scrollbar">
-            @php
-                $notifications = [
-                    [
-                        'id' => 1,
-                        'userName' => 'Terry Franci',
-                        'userImage' => '/images/user/user-02.jpg',
-                        'action' => 'requests permission to change',
-                        'project' => 'Project - Nganter App',
-                        'type' => 'Project',
-                        'time' => '5 min ago',
-                        'status' => 'online',
-                    ],
-                    [
-                        'id' => 2,
-                        'userName' => 'Alex Johnson',
-                        'userImage' => '/images/user/user-03.jpg',
-                        'action' => 'requests permission to change',
-                        'project' => 'Project - Nganter App',
-                        'type' => 'Project',
-                        'time' => '10 min ago',
-                        'status' => 'offline',
-                    ],
-                    [
-                        'id' => 3,
-                        'userName' => 'Sarah Williams',
-                        'userImage' => '/images/user/user-04.jpg',
-                        'action' => 'requests permission to change',
-                        'project' => 'Project - Dashboard UI',
-                        'type' => 'Project',
-                        'time' => '15 min ago',
-                        'status' => 'online',
-                    ],
-                    [
-                        'id' => 4,
-                        'userName' => 'Mike Brown',
-                        'userImage' => '/images/user/user-05.jpg',
-                        'action' => 'requests permission to change',
-                        'project' => 'Project - E-commerce',
-                        'type' => 'Project',
-                        'time' => '20 min ago',
-                        'status' => 'online',
-                    ],
-                    [
-                        'id' => 5,
-                        'userName' => 'Emma Davis',
-                        'userImage' => '/images/user/user-06.jpg',
-                        'action' => 'requests permission to change',
-                        'project' => 'Project - Mobile App',
-                        'type' => 'Project',
-                        'time' => '25 min ago',
-                        'status' => 'offline',
-                    ],
-                    [
-                        'id' => 6,
-                        'userName' => 'John Smith',
-                        'userImage' => '/images/user/user-07.jpg',
-                        'action' => 'requests permission to change',
-                        'project' => 'Project - Landing Page',
-                        'type' => 'Project',
-                        'time' => '30 min ago',
-                        'status' => 'online',
-                    ],
-                    [
-                        'id' => 7,
-                        'userName' => 'Lisa Anderson',
-                        'userImage' => '/images/user/user-08.jpg',
-                        'action' => 'requests permission to change',
-                        'project' => 'Project - Blog System',
-                        'type' => 'Project',
-                        'time' => '35 min ago',
-                        'status' => 'online',
-                    ],
-                    [
-                        'id' => 8,
-                        'userName' => 'David Wilson',
-                        'userImage' => '/images/user/user-09.jpg',
-                        'action' => 'requests permission to change',
-                        'project' => 'Project - CRM Dashboard',
-                        'type' => 'Project',
-                        'time' => '40 min ago',
-                        'status' => 'online',
-                    ],
-                ];
-            @endphp
-
-            @foreach ($notifications as $notification)
+            @forelse ($notifications_tickets as $notification)
                 <li @click="handleItemClick()">
-                    <a
-                        class="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
-                        href="#"
-                    >
-                        <span class="relative block w-full h-10 rounded-full z-1 max-w-10">
-                            <img src="{{ $notification['userImage'] }}" alt="User" class="overflow-hidden rounded-full" />
-                            <span
-                                class="absolute bottom-0 right-0 z-10 h-2.5 w-full max-w-2.5 rounded-full border-[1.5px] border-white dark:border-gray-900 {{ $notification['status'] === 'online' ? 'bg-success-500' : 'bg-error-500' }}"
-                            ></span>
-                        </span>
+                    <a href="/ticket-support" class="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg">  
+                        <span class="block w-full">
+                            <div class="mb-1.5 flex items-center justify-between text-theme-sm text-gray-500 dark:text-gray-400">
+                                <div>
+                                    <span class="font-medium text-gray-800 dark:text-white/90">{{ $notification->employee?->first_name }} {{ $notification->employee?->last_name }}</span>
+                                    <span class="ml-1 text-gray-600 dark:text-gray-300">created ticket</span>
+                                    <span class="font-medium text-gray-800 dark:text-white/90"> {{ $notification->id_ticket }}</span>
+                                </div>
+                                @php
+                                    $status = $notification->status;
+                                    $labelClass = 'inline-block rounded-full px-2 py-0.5 text-xs font-semibold ';
+                                    if ($status === 'open') {
+                                        $labelClass .= 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200';
+                                    } elseif ($status === 'in_progress') {
+                                        $labelClass .= 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200';
+                                    } elseif ($status === 'closed') {
+                                        $labelClass .= 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200';
+                                    } else {
+                                        $labelClass .= 'bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-200';
+                                    }
+                                @endphp
+                                <span class="{{ $labelClass }}">{{ ucfirst(str_replace('_', ' ', $status)) }}</span>
+                            </div>
 
-                        <span class="block">
-                            <span class="mb-1.5 block text-theme-sm text-gray-500 dark:text-gray-400">
-                                <span class="font-medium text-gray-800 dark:text-white/90">
-                                    {{ $notification['userName'] }}
-                                </span>
-                                {{ $notification['action'] }}
-                                <span class="font-medium text-gray-800 dark:text-white/90">
-                                    {{ $notification['project'] }}
-                                </span>
-                            </span>
-
-                            <span class="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                                <span>{{ $notification['type'] }}</span>
+                            <div class="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
+                                <span>Ticket Support</span>
                                 <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
-                                <span>{{ $notification['time'] }}</span>
-                            </span>
+                                <span>{{ Carbon::parse($notification->created_at)->diffForHumans() }}</span>
+                            </div>
                         </span>
                     </a>
                 </li>
-            @endforeach
+            @empty
+                <li>
+                    <div class="p-3 text-center text-sm text-gray-500">No notifications</div>
+                </li>
+            @endforelse
         </ul>
+
+ @endcan
+
 
         <!-- View All Button -->
         <a
