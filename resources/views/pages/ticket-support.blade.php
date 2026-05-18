@@ -47,7 +47,9 @@
                 placeholder: "Select Option",
                 width: '100%',
                 // Ini penting agar dropdown ikut tema dark/light
-                dropdownCssClass: "custom-select2-dropdown" 
+                dropdownCssClass: "custom-select2-dropdown",
+                // Tambahkan class pada container agar mudah ditargetkan oleh CSS
+                containerCssClass: "custom-select2-container"
             });
 
             // Update class pada select

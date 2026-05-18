@@ -253,6 +253,36 @@ layer(base);
     @apply !bg-brand-500 !text-white;
 }
 
+/* Kustom container & search field untuk Select2 agar mengikuti dark-mode */
+.custom-select2-container .select2-selection--single {
+    @apply !bg-transparent !text-gray-800 dark:!text-white/90;
+}
+
+.dark .custom-select2-container .select2-selection--single {
+    @apply !bg-gray-900 !border-gray-700 !text-white/90;
+}
+
+.custom-select2-container .select2-search__field {
+    @apply !bg-transparent !text-gray-800;
+}
+
+.dark .custom-select2-container .select2-search__field {
+    @apply !bg-transparent !text-white/90;
+}
+
+.custom-select2-container .select2-search__field::placeholder {
+    color: #9ca3af;
+}
+
+.dark .custom-select2-container .select2-search__field::placeholder {
+    color: #9ca3af;
+}
+
+/* Pastikan dropdown kustom juga mengadopsi tema */
+.custom-select2-dropdown {
+    @apply !border-gray-300 !bg-white !shadow-lg dark:!border-gray-700 dark:!bg-gray-900;
+}
+
 @utility menu-item {
     @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm;
 }
