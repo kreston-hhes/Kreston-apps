@@ -95,63 +95,114 @@
             @enderror
         </div>
 
-        <div class="mt-5">
-            <x-ui.button id="ticket-support-submit" size="sm" variant="primary" type="submit" disabled>Submit Ticket</x-ui.button>
-        </div>
+      <div class="mt-5">
+    <button
+        id="ticket-support-submit"
+        type="submit"
+        disabled
+        class="w-full rounded-lg bg-brand-500 px-4 py-3 text-sm font-medium text-white opacity-50 cursor-not-allowed transition hover:bg-brand-600"
+    >
+        Submit Ticket
+    </button>
+</div>
     </form>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const ticketForm = document.getElementById('ticket-support-form');
-            const submitButton = document.getElementById('ticket-support-submit');
-            const fields = [
-                ticketForm.querySelector('[name="requester_name"]'),
-                ticketForm.querySelector('[name="requester_email"]'),
-                ticketForm.querySelector('[name="phone_number"]'),
-                ticketForm.querySelector('[name="partner_name"]'),
-                ticketForm.querySelector('[name="description"]'),
-            ];
-            const emailError = document.getElementById('email-domain-error');
-            const emailRegex = /^[A-Za-z0-9._%+-]+@kreston\.co\.id$/i;
+document.addEventListener('DOMContentLoaded', function () {
 
-            function validateForm() {
-                const allFilled = fields.every(field => field && field.value.trim() !== '');
-                const emailValue = fields[1]?.value.trim() || '';
-                const emailValid = emailRegex.test(emailValue);
+    const ticketForm = document.getElementById('ticket-support-form');
+    const submitButton = document.getElementById('ticket-support-submit');
+    const emailError = document.getElementById('email-domain-error');
 
-                if (emailValue !== '' && !emailValid) {
-                    emailError.textContent = 'Email harus menggunakan domain @kreston.co.id.';
-                    emailError.classList.remove('hidden');
-                } else {
-                    emailError.textContent = '';
-                    emailError.classList.add('hidden');
-                }
+    if (!ticketForm || !submitButton) {
+        return;
+    }
 
-                const enabled = allFilled && emailValid;
-                submitButton.disabled = !enabled;
-                submitButton.classList.toggle('opacity-50', !enabled);
-                submitButton.classList.toggle('cursor-not-allowed', !enabled);
-            }
+    const requesterName = ticketForm.querySelector('[name="requester_name"]');
+    const requesterEmail = ticketForm.querySelector('[name="requester_email"]');
+    const phoneNumber = ticketForm.querySelector('[name="phone_number"]');
+    const partnerName = ticketForm.querySelector('[name="partner_name"]');
+    const description = ticketForm.querySelector('[name="description"]');
 
-            fields.forEach(field => {
-                if (!field) {
-                    return;
-                }
-                field.addEventListener('input', validateForm);
-                field.addEventListener('change', validateForm);
-            });
+    const fields = [
+        requesterName,
+        requesterEmail,
+        phoneNumber,
+        partnerName,
+        description
+    ];
 
-            validateForm();
+    const emailRegex = /^[A-Za-z0-9._%+-]+@kreston\.co\.id$/i;
 
-            if (ticketForm && submitButton) {
-                ticketForm.addEventListener('submit', function () {
-                    submitButton.disabled = true;
-                    submitButton.classList.add('opacity-50', 'cursor-not-allowed');
-                    submitButton.innerText = 'Sending...';
-                });
-            }
-        });
-    </script>
+    function validateForm() {
+
+        const allFilled = fields.every(field =>
+            field && field.value.trim() !== ''
+        );
+
+        const emailValue = requesterEmail.value.trim();
+
+        const emailValid = emailRegex.test(emailValue);
+
+        if (emailValue !== '' && !emailValid) {
+
+            emailError.textContent =
+                'Email harus menggunakan domain @kreston.co.id.';
+
+            emailError.classList.remove('hidden');
+
+        } else {
+
+            emailError.textContent = '';
+
+            emailError.classList.add('hidden');
+        }
+
+        const enabled = allFilled && emailValid;
+
+        submitButton.disabled = !enabled;
+
+        if (enabled) {
+
+            submitButton.classList.remove(
+                'opacity-50',
+                'cursor-not-allowed'
+            );
+
+        } else {
+
+            submitButton.classList.add(
+                'opacity-50',
+                'cursor-not-allowed'
+            );
+        }
+    }
+
+    fields.forEach(field => {
+
+        if (!field) return;
+
+        field.addEventListener('input', validateForm);
+
+        field.addEventListener('change', validateForm);
+    });
+
+    validateForm();
+
+    ticketForm.addEventListener('submit', function () {
+
+        submitButton.disabled = true;
+
+        submitButton.innerText = 'Sending...';
+
+        submitButton.classList.add(
+            'opacity-50',
+            'cursor-not-allowed'
+        );
+    });
+
+});
+</script>
                 </div>
             </div>
 

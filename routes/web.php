@@ -36,7 +36,6 @@ Route::get('/{ticketNumber}', [PublicTicketController::class, 'checkStatus'])
 |--------------------------------------------------------------------------
 | apps.kreston.co.id
 */
-
 Route::domain('apps.kreston.id')->group(function () {
 // 1. Rute TAMU (Bisa diakses tanpa login)
 Route::middleware('guest')->group(function () {
