@@ -7,6 +7,15 @@ use App\Http\Controllers\PublicTicketController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
+/*
+|--------------------------------------------------------------------------
+| PUBLIC TICKET DOMAIN
+|--------------------------------------------------------------------------
+| tickets.kreston.co.id
+*/
+
+Route::domain('ticket.kreston.id')->group(function () {
+
 
 Route::get('/public-ticket', [PublicTicketController::class, 'index'])
         ->name('public-ticket.form');
@@ -17,7 +26,18 @@ Route::get('/public-ticket/{ticketNumber}', [PublicTicketController::class, 'che
     ->name('public-ticket.status');
 
 
+});
 
+
+
+/*
+|--------------------------------------------------------------------------
+| INTERNAL APPS DOMAIN
+|--------------------------------------------------------------------------
+| apps.kreston.co.id
+*/
+
+Route::domain('apps.kreston.id')->group(function () {
 // 1. Rute TAMU (Bisa diakses tanpa login)
 Route::middleware('guest')->group(function () {
     Route::get('/signin', [AuthController::class, 'showLogin'])->name('login');
@@ -96,7 +116,7 @@ Route::get('/', function () {
 });
 
 
-
+});
 
 
 
