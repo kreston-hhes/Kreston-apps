@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             try {
 
-                const response = await fetch(`/public-ticket/${ticketNumber}`);
+                const response = await fetch(`/${ticketNumber}`);
 
                 const data = await response.json();
 
