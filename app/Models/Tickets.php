@@ -11,8 +11,12 @@ class Tickets extends Model
     protected $fillable = [
         'id_ticket',
         'request_date',
-        'id_employee',
+        'requester_name',
+        'requester_email',
+        'partner_name',
+        'phone_number',
         'issue_description',
+        'resolution',
         'status',
         'assigned_to',
     ];
@@ -21,9 +25,5 @@ class Tickets extends Model
         'request_date' => 'datetime',
     ];
 
-    //relasi ke Employee
-    public function employee()
-    {
-        return $this->belongsTo(Employee::class, 'id_employee');
-    }
+  
 }

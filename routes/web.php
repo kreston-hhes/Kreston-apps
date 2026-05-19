@@ -3,8 +3,20 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PublicTicketController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+
+
+Route::get('/public-ticket', [PublicTicketController::class, 'index'])
+        ->name('public-ticket.form');
+//submit ticket support
+    Route::post('/public-ticket', [PublicTicketController::class, 'submitTicket'])->name('public-ticket-support.submit');
+//Find Status ticket
+Route::get('/public-ticket/{ticketNumber}', [PublicTicketController::class, 'checkStatus'])
+    ->name('public-ticket.status');
+
+
 
 // 1. Rute TAMU (Bisa diakses tanpa login)
 Route::middleware('guest')->group(function () {
@@ -43,6 +55,10 @@ Route::middleware('auth')->group(function () {
 
     //submit ticket support
     Route::post('/ticket-support', [DashboardController::class, 'submitTicket'])->name('ticket-support.submit');
+
+    // Edit ticket support detail page
+    Route::get('/ticket-support/{id}/edit', [DashboardController::class, 'editTicketSupport'])->name('ticket-support.edit');
+    Route::patch('/ticket-support/{id}', [DashboardController::class, 'updateTicketSupport'])->name('ticket-support.update');
 
     // Start a ticket (open -> in_progress)
     Route::post('/ticket-support/{id}/start', [DashboardController::class, 'startTicket'])->name('ticket-start');

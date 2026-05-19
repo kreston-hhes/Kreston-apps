@@ -15,75 +15,137 @@
     <form id="ticket-support-form" action="{{ route('ticket-support.submit') }}" method="POST">
     @csrf
 
-   {{-- multiple select --}}
-    <div>
-        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-            Employee Name
-        </label>
-        
-        <div x-data="{ isOptionSelected: false }" class="relative z-20 bg-transparent">
-    <select name="employee_id"
-        id="select2-setup"
-        class="hidden" {{-- Sembunyikan yang asli --}}
-    >
-        <option value="">Select Option</option>
-        @foreach ($employees as $employee)
-            <option value="{{ $employee->id }}">{{ $employee->first_name }} {{ $employee->last_name }}</option>  
-        @endforeach
-    </select>
+        <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                Full Name
+            </label>
+            <input type="text"
+                name="requester_name"
+                value="{{ old('requester_name') }}"
+                placeholder="Enter your full name..."
+                class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+            @error('requester_name')
+                <p class="text-theme-xs text-error-500 mt-1.5">{{ $message }}</p>
+            @enderror
+        </div>
 
-    {{-- SVG Panah kamu tetap di sini --}}
-    <span class="pointer-events-none absolute top-1/2 right-4 z-30 -translate-y-1/2 text-gray-700 dark:text-gray-400">
-        <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-    </span>
-</div>
+        <div class="mt-4">
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                Email
+            </label>
+            <input type="email"
+                name="requester_email"
+                id="requester_email"
+                value="{{ old('requester_email') }}"
+                placeholder="Enter your email..."
+                class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+            @error('requester_email')
+                <p class="text-theme-xs text-error-500 mt-1.5">{{ $message }}</p>
+            @enderror
+            <p id="email-domain-error" class="text-theme-xs text-error-500 mt-1.5 hidden"></p>
+        </div>
 
-<script type="module">
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof $ !== 'undefined') {
-            $('#select2-setup').select2({
-                placeholder: "Select Option",
-                width: '100%',
-                // Ini penting agar dropdown ikut tema dark/light
-                dropdownCssClass: "custom-select2-dropdown",
-                // Tambahkan class pada container agar mudah ditargetkan oleh CSS
-                containerCssClass: "custom-select2-container"
-            });
+        <div class="mt-4">
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                Phone Number
+            </label>
+            <input type="text"
+                name="phone_number"
+                value="{{ old('phone_number') }}"
+                placeholder="Enter your phone number..."
+                class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+            @error('phone_number')
+                <p class="text-theme-xs text-error-500 mt-1.5">{{ $message }}</p>
+            @enderror
+        </div>
 
-            // Update class pada select
-            $('#select2-setup').on('change', function() {
-                const data = $(this).val();
-                console.log("Data terpilih:", data);
-            });
+        <div class="mt-4">
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                Partner Team
+            </label>
+            <select name="partner_name"
+                class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30">
+                <option value="">Select Partner Team</option>
+                @foreach ($partners as $partner)
+                    <option value="{{ $partner->code }}" {{ old('partner_code') === $partner->code ? 'selected' : '' }}>{{ $partner->name }}</option>
+                @endforeach
+            </select>
+            @error('partner_name')
+                <p class="text-theme-xs text-error-500 mt-1.5">{{ $message }}</p>
+            @enderror
+        </div>
 
+        <div class="mt-4">
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                Issue Description
+            </label>
+            <textarea name="description"
+                placeholder="Enter an issue description..."
+                rows="6"
+                class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30">{{ old('description') }}</textarea>
+            @error('description')
+                <p class="text-theme-xs text-error-500 mt-1.5">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div class="mt-5">
+            <x-ui.button id="ticket-support-submit" size="sm" variant="primary" type="submit" disabled>Submit Ticket</x-ui.button>
+        </div>
+    </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
             const ticketForm = document.getElementById('ticket-support-form');
             const submitButton = document.getElementById('ticket-support-submit');
+            const fields = [
+                ticketForm.querySelector('[name="requester_name"]'),
+                ticketForm.querySelector('[name="requester_email"]'),
+                ticketForm.querySelector('[name="phone_number"]'),
+                ticketForm.querySelector('[name="partner_name"]'),
+                ticketForm.querySelector('[name="description"]'),
+            ];
+            const emailError = document.getElementById('email-domain-error');
+            const emailRegex = /^[A-Za-z0-9._%+-]+@kreston\.co\.id$/i;
+
+            function validateForm() {
+                const allFilled = fields.every(field => field && field.value.trim() !== '');
+                const emailValue = fields[1]?.value.trim() || '';
+                const emailValid = emailRegex.test(emailValue);
+
+                if (emailValue !== '' && !emailValid) {
+                    emailError.textContent = 'Email harus menggunakan domain @kreston.co.id.';
+                    emailError.classList.remove('hidden');
+                } else {
+                    emailError.textContent = '';
+                    emailError.classList.add('hidden');
+                }
+
+                const enabled = allFilled && emailValid;
+                submitButton.disabled = !enabled;
+                submitButton.classList.toggle('opacity-50', !enabled);
+                submitButton.classList.toggle('cursor-not-allowed', !enabled);
+            }
+
+            fields.forEach(field => {
+                if (!field) {
+                    return;
+                }
+                field.addEventListener('input', validateForm);
+                field.addEventListener('change', validateForm);
+            });
+
+            validateForm();
 
             if (ticketForm && submitButton) {
                 ticketForm.addEventListener('submit', function () {
                     submitButton.disabled = true;
                     submitButton.classList.add('opacity-50', 'cursor-not-allowed');
-                    submitButton.innerText = 'Submitting...';
+                    submitButton.innerText = 'Sending...';
                 });
             }
-        }
-    });
-</script>
-</div>
-
-{{-- multiple select --}}
-
-
-    <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-            Issue Description
-        </label>
-        <textarea  name="description"placeholder="Enter an issue description..." type="text" rows="6"
-            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"></textarea>
-    <x-ui.button id="ticket-support-submit" size="sm" variant="primary" type="submit">Submit Ticket</x-ui.button>
-        </form>
-        </div>
+        });
+    </script>
 
          <div class="pt-4 max-w-full overflow-x-auto">
             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
@@ -105,6 +167,7 @@
                             </a>
                         </th>
                         <th class="px-6 py-3 text-start text-theme-xs font-medium text-gray-500">Requester</th>
+                        <th class="px-6 py-3 text-start text-theme-xs font-medium text-gray-500">Team</th>
                         <th class="px-6 py-3 text-start text-theme-xs font-medium text-gray-500">Issue Description</th>
                         <th class="px-6 py-3 text-start">
                             <a href="{{ request()->fullUrlWithQuery(['sort' => 'status', 'direction' => request('direction') === 'asc' ? 'desc' : 'asc']) }}" class="flex items-center gap-1 text-theme-xs font-medium text-gray-500 hover:text-blue-600">
@@ -118,16 +181,17 @@
                                 <svg class="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" stroke-width="2"/></svg>
                             </a>
                         </th>
-                        <th class="px-6 py-3 text-start text-theme-xs font-medium text-gray-500">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($tickets as $ticket)
-                        <tr class="border-b border-gray-100 dark:border-white/[0.05] hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                        <tr class="border-b border-gray-100 dark:border-white/[0.05] hover:bg-gray-50 dark:hover:bg-white/[0.02] cursor-pointer transition-colors" onclick="window.location.href='{{ route('ticket-support.edit', $ticket->id) }}'">
                             <td class="px-6 py-3.5 text-theme-sm text-gray-700 dark:text-gray-400">{{ $ticket->id_ticket }}</td>
                             <td class="px-6 py-3.5 text-theme-sm text-gray-700 dark:text-gray-400">{{ optional($ticket->request_date)->format('Y-m-d') }}</td>
-                            <td class="px-6 py-3.5 text-theme-sm text-gray-700 dark:text-gray-400">{{ $ticket->employee?->first_name }} {{ $ticket->employee?->last_name }}</td>
+                            <td class="px-6 py-3.5 text-theme-sm text-gray-700 dark:text-gray-400">{{ $ticket->requester_name }}</td>
+                            <td class="px-6 py-3.5 text-theme-sm text-gray-700 dark:text-gray-400">{{ $ticket->partner_name }}</td>
                             <td class="px-6 py-3.5 text-theme-sm text-gray-700 dark:text-gray-400">{{ $ticket->issue_description }}</td>
+                      
                             <td class="px-6 py-3.5">
                                 @php
                                     $statusLabel = ucfirst(str_replace('_', ' ', $ticket->status));
@@ -146,21 +210,6 @@
                                 <span class="{{ $statusClasses }}">{{ $statusLabel }}</span>
                             </td>
                             <td class="px-6 py-3.5 text-theme-sm text-gray-700 dark:text-gray-400">{{ $ticket->assigned_to ?? '-' }}</td>
-                            <td class="px-6 py-3.5 text-theme-sm text-gray-700 dark:text-gray-400">
-                                @if($ticket->status === 'open')
-                                    <form action="{{ route('ticket-start', $ticket->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        <button type="submit" class="inline-flex items-center rounded-md bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700">Start</button>
-                                    </form>
-                                @elseif($ticket->status === 'in_progress')
-                                    <form action="{{ route('ticket-close', $ticket->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        <button type="submit" class="inline-flex items-center rounded-md bg-gray-700 px-3 py-1 text-xs font-medium text-white hover:bg-gray-800">Close</button>
-                                    </form>
-                                @else
-                                    <span class="text-sm text-gray-500">-</span>
-                                @endif
-                            </td>
                         </tr>
                     @empty
                         <tr>

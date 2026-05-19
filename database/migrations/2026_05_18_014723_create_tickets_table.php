@@ -15,8 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('id_ticket')->unique();
             $table->date('request_date');
-            $table->foreignId('id_employee')->constrained('employees')->onDelete('cascade');
+            $table->string('requester_name');
+            $table->string('requester_email');
+            $table->string('partner_name');
+            $table->string('phone_number');
             $table->text('issue_description');
+            $table->text('resolution')->nullable();
             $table->enum('status', ['open', 'in_progress', 'closed'])->default('open');
             $table->string('assigned_to')->nullable();
             $table->timestamps();

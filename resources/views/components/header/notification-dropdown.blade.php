@@ -3,7 +3,7 @@
     use App\Models\Tickets;
     use Carbon\Carbon;
 
-    $notifications_tickets = Tickets::with('employee')
+    $notifications_tickets = Tickets::query()
         ->where('status', '!=', 'closed')
         ->latest('request_date')
         ->limit(6)
@@ -116,11 +116,11 @@
         <ul class="flex flex-col h-auto overflow-y-auto custom-scrollbar">
             @forelse ($notifications_tickets as $notification)
                 <li @click="handleItemClick()">
-                    <a href="/ticket-support" class="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg">  
+                    <a href="{{ route('ticket-support.edit', $notification->id) }}" class="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg">  
                         <span class="block w-full">
                             <div class="mb-1.5 flex items-center justify-between text-theme-sm text-gray-500 dark:text-gray-400">
                                 <div>
-                                    <span class="font-medium text-gray-800 dark:text-white/90">{{ $notification->employee?->first_name }} {{ $notification->employee?->last_name }}</span>
+                                    <span class="font-medium text-gray-800 dark:text-white/90">{{ $notification->requester_name }}</span>
                                     <span class="ml-1 text-gray-600 dark:text-gray-300">created ticket</span>
                                     <span class="font-medium text-gray-800 dark:text-white/90"> {{ $notification->id_ticket }}</span>
                                 </div>

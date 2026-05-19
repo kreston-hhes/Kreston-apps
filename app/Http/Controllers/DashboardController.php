@@ -7,6 +7,7 @@ use App\Services\AlertService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use App\Models\Employee;
+use App\Models\Partnership;
 use App\Models\Tickets;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -21,13 +22,9 @@ class DashboardController extends Controller
 
     public function showTicketSupport(Request $request)
     {
-        $employees = Employee::all();
+        $partners = Partnership::all();
 
-        $ticketsQuery = Tickets::with('employee');
-
-        if ($request->filled('employee_id')) {
-            $ticketsQuery->where('id_employee', $request->employee_id);
-        }
+        $ticketsQuery = Tickets::query();
 
         $sortAllowed = ['id_ticket', 'request_date', 'status', 'assigned_to'];
         $sort = $request->get('sort');
@@ -43,7 +40,7 @@ class DashboardController extends Controller
 
         return view('pages.ticket-support', [
             'title' => 'Ticket Support',
-            'employees' => $employees,
+            'partners' => $partners,
             'tickets' => $tickets,
         ]);
     }
@@ -52,11 +49,16 @@ class DashboardController extends Controller
     {
         // Validasi input
         $request->validate([
-            'employee_id' => 'required|exists:employees,id',
+            'requester_name' => 'required|string|max:255',
+            'requester_email' => ['required', 'email', 'max:255', 'regex:/^[A-Za-z0-9._%+-]+@kreston\.co\.id$/i'],
+            'partner_name' => 'required|string|max:255',
+            'phone_number' => 'required|string|max:50',
             'description' => 'required|string',
+        ], [
+            'requester_email.regex' => 'Email harus menggunakan domain @kreston.co.id.',
         ]);
 
-           DB::beginTransaction();
+        DB::beginTransaction();
 
     try {
 
@@ -92,8 +94,11 @@ class DashboardController extends Controller
         // Simpan ticket
         $ticket = Tickets::create([
             'id_ticket' => $ticketNumber,
-            'request_date' => Carbon::now(),
-            'id_employee' => $request->employee_id,
+            'request_date' => Carbon::now()->toDateString(),
+            'requester_name' => $request->requester_name,
+            'requester_email' => $request->requester_email,
+            'partner_name' => $request->partner_name,
+            'phone_number' => $request->phone_number,
             'issue_description' => $request->description,
             'status' => 'open',
         ]);
@@ -140,6 +145,55 @@ class DashboardController extends Controller
 
     }
 
+    public function editTicketSupport($id)
+    {
+        $ticket = Tickets::findOrFail($id);
+        $partners = Partnership::all();
+
+        return view('pages.ticket-support-edit', [
+            'title' => 'Edit Ticket Support',
+            'ticket' => $ticket,
+            'partners' => $partners,
+        ]);
+    }
+
+    public function updateTicketSupport(Request $request, $id): RedirectResponse
+    {
+        $ticket = Tickets::findOrFail($id);
+
+        $request->validate([
+            'requester_name' => 'required|string|max:255',
+            'requester_email' => ['required', 'email', 'max:255', 'regex:/^[A-Za-z0-9._%+-]+@kreston\.co\.id$/i'],
+            'partner_name' => 'required|string|max:255',
+            'phone_number' => 'required|string|max:50',
+            'description' => 'required|string',
+        ], [
+            'requester_email.regex' => 'Email harus menggunakan domain @kreston.co.id.',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $ticket->requester_name = $request->requester_name;
+            $ticket->requester_email = $request->requester_email;
+            $ticket->partner_name = $request->partner_name;
+            $ticket->phone_number = $request->phone_number;
+            $ticket->issue_description = $request->description;
+            $ticket->save();
+
+            DB::commit();
+
+            AlertService::notify('success', 'Updated', 'Ticket details have been updated.');
+            return redirect()->route('ticket-support');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            logger()->error('Update Ticket Error: ' . $e->getMessage());
+
+            AlertService::notify('error', 'System Error', 'Unable to update the ticket.');
+            return back()->withInput();
+        }
+    }
+
     public function startTicket(Request $request, $id): RedirectResponse
     {
         DB::beginTransaction();
@@ -174,6 +228,10 @@ class DashboardController extends Controller
 
     public function closeTicket(Request $request, $id): RedirectResponse
     {
+        $request->validate([
+            'resolution' => 'required|string',
+        ]);
+
         DB::beginTransaction();
 
         try {
@@ -185,19 +243,20 @@ class DashboardController extends Controller
             }
 
             $ticket->status = 'closed';
+            $ticket->resolution = $request->resolution;
             $ticket->updated_at = Carbon::now();
             $ticket->save();
 
             DB::commit();
 
             AlertService::notify('success', 'Closed', 'Ticket has been closed.');
-            return back();
+            return redirect()->route('ticket-support');
 
         } catch (\Exception $e) {
             DB::rollBack();
             logger()->error('Close Ticket Error: ' . $e->getMessage());
             AlertService::notify('error', 'System Error', 'Unable to close ticket.');
-            return back();
+            return back()->withInput();
         }
     }
     }
