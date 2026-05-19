@@ -17,12 +17,12 @@ use Illuminate\Support\Facades\Auth;
 Route::domain('ticket.kreston.id')->group(function () {
 
 
-Route::get('/public-ticket', [PublicTicketController::class, 'index'])
+Route::get('/', [PublicTicketController::class, 'index'])
         ->name('public-ticket.form');
 //submit ticket support
-    Route::post('/public-ticket', [PublicTicketController::class, 'submitTicket'])->name('public-ticket-support.submit');
+    Route::post('/', [PublicTicketController::class, 'submitTicket'])->name('public-ticket-support.submit');
 //Find Status ticket
-Route::get('/public-ticket/{ticketNumber}', [PublicTicketController::class, 'checkStatus'])
+Route::get('/{ticketNumber}', [PublicTicketController::class, 'checkStatus'])
     ->name('public-ticket.status');
 
 
