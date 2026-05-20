@@ -11,6 +11,11 @@ use App\Models\Partnership;
 use App\Models\Tickets;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+use Exception;
+use Illuminate\Support\Facades\Hash;
+
 
 class DashboardController extends Controller
 {
@@ -19,6 +24,137 @@ class DashboardController extends Controller
         return view('pages.dashboard');
     }
 
+
+   public function updatePassword(Request $request): RedirectResponse
+{
+       
+        $user = auth()->user();
+
+        try {
+
+        // Tulis pesan kustom di sini
+        $customMessages = [
+            'current_password.required' => 'Current password is required.',
+            'current_password.current_password' => 'Current password is incorrect.',
+            'password.required' => 'New password is required.',
+            'password.min' => 'New password must be at least :min characters.',
+            'password.confirmed' => 'The new password confirmation does not match.',
+        ];
+
+            // 1. Validasi Input Password
+            $validator = Validator::make($request->all(), [
+                'current_password' => ['required', 'current_password'], // Memastikan password lama cocok dengan DB
+                'password'         => ['required', 'string', 'min:8', 'confirmed'], // Wajib sama dengan password_confirmation
+            ], $customMessages);
+
+            if ($validator->fails()) {
+                throw new ValidationException($validator);
+            }
+
+            // 2. Ambil data password baru, enkripsi dengan Hash, lalu simpan
+            $user->update([
+                'password' => Hash::make($request->input('password')),
+            ]);
+
+            // 3. Trigger Alert Sukses Ganti Password
+            AlertService::notify(
+                'success',
+                'Password Changed',
+                'Your password has been changed successfully.'
+            );
+
+            return redirect()->back();
+
+        } catch (ValidationException $e) {
+            AlertService::notify(
+                'error',
+                'Password Update Failed',
+                'Please check your password inputs.'
+            );
+            return redirect()->back()->withErrors($e->validator);
+
+        } catch (Exception $e) {
+            AlertService::notify(
+                'error',
+                'System Error',
+                'Failed to update password: ' . $e->getMessage()
+            );
+            return redirect()->back();
+        }
+    }
+
+
+
+    public function showProfile()
+    {
+        $user = auth()->user();
+        $employee = Employee::with('partnership', 'manager')->where('email', $user->email)->first();
+
+        return view('pages.profile', [
+            'title' => 'Profile',
+            'employee' => $employee,
+        ]);
+    }
+
+    public function updateProfile(Request $request): RedirectResponse
+    {
+        $user = auth()->user();
+       
+
+        try{
+
+        
+        $employee = Employee::where('email', $user->email)->firstOrFail();
+   // 1. Buat validator manual agar error-nya bisa kita tangkap di blok catch
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'last_name'  => 'nullable|string|max:255',
+            'phone'      => 'nullable|string|max:50',
+            'address'    => 'nullable|string|max:500',
+            'gender'     => 'in:male,female',
+            'birth_date' => 'nullable|date',
+        ]);
+
+// Jika validasi gagal, lempar ValidationException agar ditangkap oleh catch pertama 
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+        
+// 2. Ambil data yang sudah tervalidasi dan lakukan update 
+        $validatedData = $validator->validated();
+        $employee->update($validatedData);
+
+        $gender = $request->input('gender');// 3. Trigger Alert Sukses
+        AlertService::notify(
+            'success',
+            'Profile Updated',
+            'Your profile has been updated successfully.'
+        );
+
+        return redirect()->route('profile.show');
+    } catch (ValidationException $e) {
+        // Tangkap jika error-nya disebabkan karena input form tidak valid
+        AlertService::notify(
+            'error',
+            'Update Failed',
+            'Please check the form for errors.'
+        );
+
+        // redirect()->back() wajib menyertakan withErrors dan withInput 
+        // supaya pesan error di bawah input form dan data lama tidak hilang
+        return redirect()->back()->withErrors($e->validator)->withInput();
+
+    } catch (Exception $e) {
+        // Tangkap jika terjadi error tidak terduga lainnya (misal: koneksi database putus, dll)
+        AlertService::notify(
+            'error',
+            'System Error',
+            'Something went wrong: ' . $e->getMessage()
+        );
+
+        return redirect()->back()->withInput();
+    }
+}
 
     public function showTicketSupport(Request $request)
     {

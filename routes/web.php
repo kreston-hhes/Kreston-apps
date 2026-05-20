@@ -51,10 +51,25 @@ Route::middleware('guest')->group(function () {
 
 // 2. Rute TERPROTEKSI
 Route::middleware('auth')->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | Umum
+    |--------------------------------------------------------------------------
+    | Semua pengguna yang sudah login bisa mengakses rute ini, tanpa memandang divisi
+    */
     // Gunakan rute dashboard yang jelas
     Route::get('/dashboard', function () {
         return view('pages.dashboard.dashboard', ['title' => 'Dashboard']);
     })->name('dashboard');
+
+    // profile pages
+Route::get('/profile', [DashboardController::class, 'showProfile'])->name('profile.show');
+Route::put('/profile', [DashboardController::class, 'updateProfile'])->name('profile.update');
+
+//change password
+Route::put('/password-update', [DashboardController::class, 'updatePassword'])->name('password.update');
+
 
   
 
@@ -129,10 +144,6 @@ Route::get('/calendar', function () {
     return view('pages.calender', ['title' => 'Calendar']);
 })->name('calendar');
 
-// profile pages
-Route::get('/profile', function () {
-    return view('pages.profile', ['title' => 'Profile']);
-})->name('profile');
 
 // form pages
 Route::get('/form-elements', function () {
