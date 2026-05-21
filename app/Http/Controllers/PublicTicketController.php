@@ -9,6 +9,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TicketSubmittedMail;
+use App\Models\Employee;
 
 
 class PublicTicketController extends Controller
@@ -96,7 +99,24 @@ class PublicTicketController extends Controller
         }
 
         DB::commit();
+        
+              // Kirim email dengan aman setelah commit database benar-benar selesai
+    DB::afterCommit(function () use ($ticket) {
 
+    $itEmails = Employee::where('division', 'IT')
+        ->where('status', 'active')
+        ->whereNotNull('email')
+        ->pluck('email')
+        ->filter()
+        ->unique()
+        ->values()
+        ->toArray();
+
+    Mail::to($ticket->requester_email)
+        ->bcc($itEmails)
+        ->send(new TicketSubmittedMail($ticket));
+
+});
         AlertService::notify(
             'success',
             'Ticket Submitted',

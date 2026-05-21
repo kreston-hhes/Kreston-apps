@@ -17,15 +17,16 @@ use Exception;
 use Illuminate\Support\Facades\Hash;
 
 
+
 class DashboardController extends Controller
 {
-    public function index()
+public function index()
     {
         return view('pages.dashboard');
     }
 
 
-   public function updatePassword(Request $request): RedirectResponse
+public function updatePassword(Request $request): RedirectResponse
 {
        
         $user = auth()->user();
@@ -85,7 +86,7 @@ class DashboardController extends Controller
 
 
 
-    public function showProfile()
+public function showProfile()
     {
         $user = auth()->user();
         $employee = Employee::with('partnership', 'manager')->where('email', $user->email)->first();
@@ -96,7 +97,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function updateProfile(Request $request): RedirectResponse
+ public function updateProfile(Request $request): RedirectResponse
     {
         $user = auth()->user();
        
@@ -156,7 +157,7 @@ class DashboardController extends Controller
     }
 }
 
-    public function showTicketSupport(Request $request)
+public function showTicketSupport(Request $request)
     {
         $partners = Partnership::all();
 
@@ -181,7 +182,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function submitTicket(Request $request): RedirectResponse
+public function submitTicket(Request $request): RedirectResponse
     {
         // Validasi input
         $request->validate([

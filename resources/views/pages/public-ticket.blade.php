@@ -12,12 +12,88 @@
         <h2 class="mb-10 text-center text-2xl font-semibold text-gray-800 dark:text-white/90">
             Need Help? Submit a Ticket Support
         </h2>
+@if (session('success'))
 
-        @if (session('success'))
-            <div class="mb-4 rounded-lg bg-emerald-100 px-4 py-3 text-sm text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200" role="alert">
-                {{ session('success') }}
+    <div
+        class="mb-4 rounded-lg bg-emerald-100 px-4 py-3 text-sm text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200"
+        role="alert"
+    >
+        {{ session('success') }}
+    </div>
+
+    <!-- Success Popup -->
+    <div
+        id="success-popup"
+        class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4"
+    >
+        <div
+            class="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-xl dark:bg-gray-900"
+        >
+
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/20">
+                <svg
+                    class="h-8 w-8 text-emerald-600 dark:text-emerald-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 13l4 4L19 7"
+                    />
+                </svg>
             </div>
-        @endif
+
+            <h3 class="mt-4 text-xl font-semibold text-gray-800 dark:text-white">
+                Success
+            </h3>
+
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                {{ session('success') }}
+            </p>
+
+            <button
+                id="close-success-popup"
+                class="mt-6 w-full rounded-lg bg-emerald-500 px-4 py-3 text-sm font-medium text-white transition hover:bg-emerald-600"
+            >
+                OK
+            </button>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const popup = document.getElementById('success-popup');
+            const closeButton = document.getElementById('close-success-popup');
+
+            if (closeButton) {
+
+                closeButton.addEventListener('click', function () {
+
+                    popup.classList.add('hidden');
+
+                });
+            }
+
+            // auto close 5 detik
+            setTimeout(() => {
+
+                if (popup) {
+
+                    popup.classList.add('hidden');
+
+                }
+
+            }, 10000);
+
+        });
+    </script>
+
+@endif
 
                     <form id="ticket-support-form" action="{{ route('public-ticket-support.submit') }}" method="POST">
     @csrf
@@ -74,7 +150,11 @@
                 class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30">
                 <option value="" selected>Select Partner Team</option>
                 @foreach ($partners as $partner)
-                    <option value="{{ $partner->code }}">{{ $partner->name }}</option>
+                    <option value="{{ $partner->code }}">
+                
+                          
+                        
+                        {{ $partner->name }} - [{{ $partner->code }}]</option>
                 @endforeach
             </select>
             @error('partner_name')
@@ -206,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
             </div>
 
-            <div class="bg-brand-950 relative hidden h-full w-full items-center lg:grid lg:w-1/2 dark:bg-white/5">
+           <div class="bg-brand-950 relative flex w-full items-center justify-center lg:grid lg:w-1/2 dark:bg-white/5">
                 <div class="z-1 flex items-center justify-center">
                     <!-- ===== Common Grid Shape Start ===== -->
                     <x-common.common-grid-shape/>
@@ -223,6 +303,13 @@ document.addEventListener('DOMContentLoaded', function () {
     placeholder="Enter Ticket Number to check status..."
     class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-white/90 placeholder:text-white/30 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
 />
+<button
+    id="check-ticket-status"
+    class="mt-4 w-full rounded-lg bg-brand-500 px-4 py-3 text-sm font-medium text-white transition hover:bg-brand-600"
+>
+    Check Status
+</button>
+
 
 
 <div id="ticket-modal" class="fixed inset-0 z-99999 hidden items-center justify-center bg-black/50 p-4">
@@ -290,119 +377,147 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('DOMContentLoaded', function () {
 
     const ticketInput = document.getElementById('ticket-number-input');
+    const checkButton = document.getElementById('check-ticket-status');
     const modal = document.getElementById('ticket-modal');
     const closeModal = document.getElementById('close-ticket-modal');
 
-    ticketInput.addEventListener('keypress', async function (e) {
+    async function checkTicketStatus() {
+
+        const ticketNumber = ticketInput.value.trim();
+
+        if (!ticketNumber) {
+            alert('Please enter ticket number.');
+            return;
+        }
+
+        try {
+
+            checkButton.disabled = true;
+            checkButton.innerText = 'Checking...';
+
+            const response = await fetch(`/${ticketNumber}`);
+
+            const data = await response.json();
+
+            if (!data.success) {
+
+                alert(data.message);
+
+                return;
+            }
+
+            document.getElementById('modal-ticket-number').innerText =
+                data.ticket.ticket_number;
+
+            const statusElement =
+                document.getElementById('modal-ticket-status');
+
+            statusElement.innerText = data.ticket.status;
+
+            statusElement.className =
+                'inline-flex w-fit rounded-full px-3 py-1 text-sm font-medium';
+
+            switch (data.ticket.status) {
+
+                case 'open':
+
+                    statusElement.classList.add(
+                        'bg-red-100',
+                        'text-red-700',
+                        'dark:bg-red-500/15',
+                        'dark:text-red-400'
+                    );
+
+                    break;
+
+                case 'in_progress':
+
+                    statusElement.classList.add(
+                        'bg-yellow-100',
+                        'text-yellow-700',
+                        'dark:bg-yellow-500/15',
+                        'dark:text-yellow-400'
+                    );
+
+                    break;
+
+                case 'closed':
+
+                    statusElement.classList.add(
+                        'bg-green-100',
+                        'text-green-700',
+                        'dark:bg-green-500/15',
+                        'dark:text-green-400'
+                    );
+
+                    break;
+
+                default:
+
+                    statusElement.classList.add(
+                        'bg-gray-100',
+                        'text-gray-700',
+                        'dark:bg-gray-500/15',
+                        'dark:text-gray-400'
+                    );
+            }
+
+            document.getElementById('modal-ticket-requester').innerText =
+                data.ticket.requester_name;
+
+            document.getElementById('modal-ticket-partner').innerText =
+                data.ticket.partner_team;
+
+            document.getElementById('modal-ticket-description').innerText =
+                data.ticket.description;
+
+            document.getElementById('modal-ticket-solution').innerText =
+                data.ticket.solution;
+
+            document.getElementById('modal-ticket-support').innerText =
+                data.ticket.support_by;
+
+            document.getElementById('modal-ticket-created').innerText =
+                data.ticket.created_at;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert('Failed to fetch ticket status.');
+
+        } finally {
+
+            checkButton.disabled = false;
+            checkButton.innerText = 'Check Status';
+        }
+    }
+
+    // ENTER di input
+    ticketInput.addEventListener('keypress', function (e) {
 
         if (e.key === 'Enter') {
 
             e.preventDefault();
 
-            const ticketNumber = ticketInput.value.trim();
-
-            if (!ticketNumber) {
-                return;
-            }
-
-            try {
-
-                const response = await fetch(`/${ticketNumber}`);
-
-                const data = await response.json();
-
-                if (!data.success) {
-                    alert(data.message);
-                    return;
-                }
-
-                document.getElementById('modal-ticket-number').innerText =
-                    data.ticket.ticket_number;
-
-              const statusElement = document.getElementById('modal-ticket-status');
-
-statusElement.innerText = data.ticket.status;
-
-statusElement.className =
-    'inline-flex w-fit rounded-full px-3 py-1 text-sm font-medium';
-
-switch (data.ticket.status) {
-
-    case 'open':
-        statusElement.classList.add(
-            'bg-red-100',
-            'text-red-700',
-            'dark:bg-red-500/15',
-            'dark:text-red-400'
-        );
-        break;
-
-    case 'in_progress':
-        statusElement.classList.add(
-            'bg-yellow-100',
-            'text-yellow-700',
-            'dark:bg-yellow-500/15',
-            'dark:text-yellow-400'
-        );
-        break;
-
-    case 'closed':
-        statusElement.classList.add(
-            'bg-green-100',
-            'text-green-700',
-            'dark:bg-green-500/15',
-            'dark:text-green-400'
-        );
-        break;
-
-    default:
-        statusElement.classList.add(
-            'bg-gray-100',
-            'text-gray-700',
-            'dark:bg-gray-500/15',
-            'dark:text-gray-400'
-        );
-
-}
-
-                document.getElementById('modal-ticket-requester').innerText =
-                    data.ticket.requester_name;
-
-                    document.getElementById('modal-ticket-partner').innerText =
-                    data.ticket.partner_team;
-
-                document.getElementById('modal-ticket-description').innerText =
-                    data.ticket.description;
-
-                    document.getElementById('modal-ticket-solution').innerText =
-                    data.ticket.solution;
-
-                    document.getElementById('modal-ticket-support').innerText =
-                    data.ticket.support_by; 
-
-                document.getElementById('modal-ticket-created').innerText =
-                    data.ticket.created_at;
-
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-
-            } catch (error) {
-
-                console.error(error);
-
-                alert('Failed to fetch ticket status.');
-
-            }
-
+            checkTicketStatus();
         }
-
     });
 
+    // CLICK button
+    checkButton.addEventListener('click', function () {
+
+        checkTicketStatus();
+    });
+
+    // CLOSE MODAL
     closeModal.addEventListener('click', function () {
 
         modal.classList.add('hidden');
         modal.classList.remove('flex');
-
     });
 
 });
