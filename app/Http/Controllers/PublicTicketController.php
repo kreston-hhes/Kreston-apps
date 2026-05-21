@@ -16,6 +16,16 @@ use App\Models\Employee;
 
 class PublicTicketController extends Controller
 {
+
+public function sendBlankMail()
+{
+
+return view('emails.blank-mail',[
+'title' => 'Title Mail',
+'logoPath' => asset('images/logo/logo.svg'),
+]);
+}
+
     public function index()
     {
         $partners = Partnership::all();

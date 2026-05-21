@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 | tickets.kreston.co.id
 */
 
+
 Route::domain('ticket.kreston.id')->group(function () {
 
 
@@ -138,6 +139,9 @@ Route::get('/', function () {
 
 
 //batas fitur nanti akan di hapus jika sudah tidak dibutuhkan
+
+
+Route::get('/bmail',[PublicTicketController::class, 'sendBlankMail']);
 
 // calender pages
 Route::get('/calendar', function () {
