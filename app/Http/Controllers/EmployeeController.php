@@ -84,9 +84,9 @@ class EmployeeController extends Controller
     });
 
     // Ambil daftar unik untuk dropdown filter di view
-    $positions = Employee::distinct()->whereNotNull('position')->pluck('position');
-    $divisions = Employee::distinct()->whereNotNull('division')->pluck('division');
-    $partnerships = Employee::distinct()->whereNotNull('partnership_id')->pluck('partnership_id')->map(function ($id) {
+    $positions = Employee::distinct()->whereNotNull('position')->orderBy('position', 'asc')->pluck('position');
+    $divisions = Employee::distinct()->whereNotNull('division')->orderBy('division', 'asc')->pluck('division');
+    $partnerships = Employee::distinct()->whereNotNull('partnership_id')->orderBy('partnership_id', 'asc')->pluck('partnership_id')->map(function ($id) {
         $partnership = \App\Models\Partnership::find($id);
         return $partnership ? $partnership->name : null;
     })->filter()->unique();

@@ -14,15 +14,16 @@ use Illuminate\Support\Facades\Auth;
 | tickets.kreston.co.id
 */
 
-Route::domain('ticket.kreston.id')->group(function () {
+
+Route::domain('ticket.' . env('APP_SHORT_URL', 'kreston.id'))->group(function () {
 
 
-Route::get('/public-ticket', [PublicTicketController::class, 'index'])
+Route::get('/', [PublicTicketController::class, 'index'])
         ->name('public-ticket.form');
 //submit ticket support
-    Route::post('/public-ticket', [PublicTicketController::class, 'submitTicket'])->name('public-ticket-support.submit');
+    Route::post('/', [PublicTicketController::class, 'submitTicket'])->name('public-ticket-support.submit');
 //Find Status ticket
-Route::get('/public-ticket/{ticketNumber}', [PublicTicketController::class, 'checkStatus'])
+Route::get('/{ticketNumber}', [PublicTicketController::class, 'checkStatus'])
     ->name('public-ticket.status');
 
 
@@ -36,8 +37,7 @@ Route::get('/public-ticket/{ticketNumber}', [PublicTicketController::class, 'che
 |--------------------------------------------------------------------------
 | apps.kreston.co.id
 */
-
-Route::domain('apps.kreston.id')->group(function () {
+Route::domain('apps.' . env('APP_SHORT_URL', 'kreston.id'))->group(function () {
 // 1. Rute TAMU (Bisa diakses tanpa login)
 Route::middleware('guest')->group(function () {
     Route::get('/signin', [AuthController::class, 'showLogin'])->name('login');
@@ -52,12 +52,27 @@ Route::middleware('guest')->group(function () {
 
 // 2. Rute TERPROTEKSI
 Route::middleware('auth')->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | Umum
+    |--------------------------------------------------------------------------
+    | Semua pengguna yang sudah login bisa mengakses rute ini, tanpa memandang divisi
+    */
     // Gunakan rute dashboard yang jelas
     Route::get('/dashboard', function () {
         return view('pages.dashboard.dashboard', ['title' => 'Dashboard']);
     })->name('dashboard');
 
-  
+    // profile pages
+Route::get('/profile', [DashboardController::class, 'showProfile'])->name('profile.show');
+Route::put('/profile', [DashboardController::class, 'updateProfile'])->name('profile.update');
+
+//change password
+Route::put('/password-update', [DashboardController::class, 'updatePassword'])->name('password.update');
+
+
+
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -71,7 +86,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['division:IT'])->group(function () {
         // Tambahkan rute khusus untuk IT di sini
        //Route to Ticket Support
-    Route::get('/ticket-support', [DashboardController::class, 'showTicketSupport'])->name('ticket-support');  
+    Route::get('/ticket-support', [DashboardController::class, 'showTicketSupport'])->name('ticket-support');
 
     //submit ticket support
     Route::post('/ticket-support', [DashboardController::class, 'submitTicket'])->name('ticket-support.submit');
@@ -125,15 +140,14 @@ Route::get('/', function () {
 
 //batas fitur nanti akan di hapus jika sudah tidak dibutuhkan
 
+
+Route::get('/bmail',[PublicTicketController::class, 'sendBlankMail']);
+
 // calender pages
 Route::get('/calendar', function () {
     return view('pages.calender', ['title' => 'Calendar']);
 })->name('calendar');
 
-// profile pages
-Route::get('/profile', function () {
-    return view('pages.profile', ['title' => 'Profile']);
-})->name('profile');
 
 // form pages
 Route::get('/form-elements', function () {
