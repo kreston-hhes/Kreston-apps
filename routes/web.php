@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 */
 
 
-Route::domain('ticket.kreston.id')->group(function () {
+Route::domain('ticket.' . env('APP_SHORT_URL', 'kreston.id'))->group(function () {
 
 
 Route::get('/', [PublicTicketController::class, 'index'])
@@ -37,7 +37,7 @@ Route::get('/{ticketNumber}', [PublicTicketController::class, 'checkStatus'])
 |--------------------------------------------------------------------------
 | apps.kreston.co.id
 */
-Route::domain('apps.kreston.id')->group(function () {
+Route::domain('apps.' . env('APP_SHORT_URL', 'kreston.id'))->group(function () {
 // 1. Rute TAMU (Bisa diakses tanpa login)
 Route::middleware('guest')->group(function () {
     Route::get('/signin', [AuthController::class, 'showLogin'])->name('login');
@@ -72,7 +72,7 @@ Route::put('/profile', [DashboardController::class, 'updateProfile'])->name('pro
 Route::put('/password-update', [DashboardController::class, 'updatePassword'])->name('password.update');
 
 
-  
+
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -86,7 +86,7 @@ Route::put('/password-update', [DashboardController::class, 'updatePassword'])->
     Route::middleware(['division:IT'])->group(function () {
         // Tambahkan rute khusus untuk IT di sini
        //Route to Ticket Support
-    Route::get('/ticket-support', [DashboardController::class, 'showTicketSupport'])->name('ticket-support');  
+    Route::get('/ticket-support', [DashboardController::class, 'showTicketSupport'])->name('ticket-support');
 
     //submit ticket support
     Route::post('/ticket-support', [DashboardController::class, 'submitTicket'])->name('ticket-support.submit');
