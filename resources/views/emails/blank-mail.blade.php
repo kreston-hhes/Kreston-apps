@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>Title Mail</title>
 </head>
+
 <body style="font-family: Arial, sans-serif; background:#f5f5f5; padding:30px;">
 
     <div style="max-width:600px; margin:auto; background:white; padding:30px; border-radius:12px;">
@@ -16,7 +18,7 @@
             Your support ticket has been submitted successfully.
         </p>
 
-       <p>Here are the details of your ticket:</p>
+        <p>Here are the details of your ticket:</p>
 
         <table width="100%" cellpadding="8" cellspacing="0" border="1" style="border-collapse: collapse;">
 
@@ -64,8 +66,7 @@
 
         <div style="margin-top:30px; text-align:center;">
 
-            <a
-                href=" url('/') "
+            <a href=" url('/') "
                 style="
                     background:#2563eb;
                     color:white;
@@ -73,8 +74,7 @@
                     border-radius:8px;
                     text-decoration:none;
                     display:inline-block;
-                "
-            >
+                ">
                 Check Ticket Status
             </a>
 
@@ -87,4 +87,5 @@
     </div>
 
 </body>
+
 </html>
