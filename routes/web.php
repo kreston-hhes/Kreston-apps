@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\AssetItController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PublicTicketController;
+use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -84,7 +86,13 @@ Route::put('/password-update', [DashboardController::class, 'updatePassword'])->
     */
 
     Route::middleware(['division:IT'])->group(function () {
-        // Tambahkan rute khusus untuk IT di sini
+
+    /*
+|--------------------------------------------------------------------------
+| Ticket Support
+|--------------------------------------------------------------------------
+|
+*/
        //Route to Ticket Support
     Route::get('/ticket-support', [DashboardController::class, 'showTicketSupport'])->name('ticket-support');
 
@@ -101,9 +109,19 @@ Route::put('/password-update', [DashboardController::class, 'updatePassword'])->
     // Close a ticket (in_progress -> closed)
     Route::post('/ticket-support/{id}/close', [DashboardController::class, 'closeTicket'])->name('ticket-close');
 
+    /*
+|--------------------------------------------------------------------------
+| Asset IT
+|--------------------------------------------------------------------------
+|
+*/
 
+Route::get('/asset-it',[AssetItController::class, 'index'])->name('asset-it.index');
 
-    });
+Route::get('/test-form',[TestController::class, 'index'])->name('test-form.index');
+Route::post('/test-form',[TestController::class, 'store'])->name('test-form.store');
+
+    });//end IT menu
 
 
 /*

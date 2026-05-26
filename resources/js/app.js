@@ -8,6 +8,13 @@ window.$ = window.jQuery = $;
 import select2 from 'select2';
 select2(window, $);
 
+
+//tom select
+import TomSelect from "tom-select";
+import "tom-select/dist/css/tom-select.css";
+
+window.TomSelect = TomSelect;
+
 // flatpickr
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
