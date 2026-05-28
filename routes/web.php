@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Auth;
 
 Route::domain('ticket.' . env('APP_SHORT_URL', 'kreston.id'))->group(function () {
 
-
 Route::get('/', [PublicTicketController::class, 'index'])
         ->name('public-ticket.form');
 //submit ticket support
@@ -25,7 +24,6 @@ Route::get('/', [PublicTicketController::class, 'index'])
 //Find Status ticket
 Route::get('/{ticketNumber}', [PublicTicketController::class, 'checkStatus'])
     ->name('public-ticket.status');
-
 
 });
 
@@ -101,8 +99,6 @@ Route::put('/password-update', [DashboardController::class, 'updatePassword'])->
     // Close a ticket (in_progress -> closed)
     Route::post('/ticket-support/{id}/close', [DashboardController::class, 'closeTicket'])->name('ticket-close');
 
-
-
     });
 
 
@@ -115,9 +111,19 @@ Route::put('/password-update', [DashboardController::class, 'updatePassword'])->
 
     Route::middleware(['division:HR,IT'])->group(function () {
 
+        // READ — daftar karyawan
         Route::get('/employee', [EmployeeController::class, 'index'])
             ->name('employees.index');
 
+        // CREATE — simpan karyawan baru  ← BARU
+        Route::post('/employees', [EmployeeController::class, 'store'])
+            ->name('employees.store');
+
+        // UPDATE — edit karyawan  ← BARU
+        Route::put('/employees/{id}', [EmployeeController::class, 'update'])
+            ->name('employees.update');
+
+        // DELETE — hapus karyawan
         Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])
             ->name('employees.destroy');
 
@@ -211,25 +217,3 @@ Route::get('/image', function () {
 Route::get('/videos', function () {
     return view('pages.ui-elements.videos', ['title' => 'Videos']);
 })->name('videos');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
