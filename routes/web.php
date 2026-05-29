@@ -7,13 +7,7 @@ use App\Http\Controllers\PublicTicketController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
-/*
-|--------------------------------------------------------------------------
-| PUBLIC TICKET DOMAIN
-|--------------------------------------------------------------------------
-| tickets.kreston.co.id
-*/
-
+// PUBLIC TICKET DOMAIN
 
 Route::domain('ticket.' . env('APP_SHORT_URL', 'kreston.id'))->group(function () {
 
@@ -27,14 +21,8 @@ Route::get('/{ticketNumber}', [PublicTicketController::class, 'checkStatus'])
 
 });
 
+//INTERNAL APPS DOMAIN
 
-
-/*
-|--------------------------------------------------------------------------
-| INTERNAL APPS DOMAIN
-|--------------------------------------------------------------------------
-| apps.kreston.co.id
-*/
 Route::domain('apps.' . env('APP_SHORT_URL', 'kreston.id'))->group(function () {
 // 1. Rute TAMU (Bisa diakses tanpa login)
 Route::middleware('guest')->group(function () {
@@ -69,16 +57,13 @@ Route::put('/profile', [DashboardController::class, 'updateProfile'])->name('pro
 //change password
 Route::put('/password-update', [DashboardController::class, 'updatePassword'])->name('password.update');
 
-
-
-
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     /*
     |--------------------------------------------------------------------------
     | IT MENU
     |--------------------------------------------------------------------------
-    | Hanya division IT
+    | Hanya divisi IT
     */
 
     Route::middleware(['division:IT'])->group(function () {
@@ -106,7 +91,7 @@ Route::put('/password-update', [DashboardController::class, 'updatePassword'])->
     |--------------------------------------------------------------------------
     | HR MENU
     |--------------------------------------------------------------------------
-    | Hanya division HR dan IT
+    | Hanya divisiHR dan IT
     */
 
     Route::middleware(['division:HR,IT'])->group(function () {
@@ -138,10 +123,6 @@ Route::get('/', function () {
 
 
 });
-
-
-
-
 
 
 //batas fitur nanti akan di hapus jika sudah tidak dibutuhkan

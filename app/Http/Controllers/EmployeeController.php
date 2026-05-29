@@ -6,15 +6,14 @@ use App\Models\Employee;
 use App\Models\Partnership;
 use Illuminate\Http\Request;
 
-class EmployeeController extends Controller
-{
-    // =========================================================================
-    // INDEX
-    // =========================================================================
-    public function index(Request $request)
-    {
+class EmployeeController extends Controller {
+    public function index(Request $request) {
         // 1. Inisialisasi Query Builder
-        $query = Employee::with(['partnership', 'manager']);
+        $query = Employee::with(['partnership', 'manager'])
+        ->where(function ($q) { 
+                // memastikan yang statusnya 'deleted' tidak ikut terbawa
+                $q->where('status', '!=', 'deleted')->orWhereNull('status');
+            });
 
         // 2. Logika Search (NIK atau Nama)
         if ($request->filled('search')) {
@@ -53,11 +52,18 @@ class EmployeeController extends Controller
         // 5. Pagination
         $perPage   = min($request->input('per_page', 5), 25);
         $employees = $query->paginate($perPage)->withQueryString();
+        
+        $activeEmployees = collect($employees->items())->filter(function ($emp) {
+        return $emp->status !== 'resigned';
+        });
+        $resignedEmployees = collect($employees->items())->filter(function ($emp) {
+        return $emp->status === 'resigned';
+        });
+        // 6. Transformasi Data untuk View 
+        $activeData   = $activeEmployees->map(fn ($emp) => $this->toTableRow($emp))->values();
+        $resignedData = $resignedEmployees->map(fn ($emp) => $this->toTableRow($emp))->values();
 
-        // 6. Transformasi Data untuk View
-        $tableData = collect($employees->items())->map(fn ($emp) => $this->toTableRow($emp));
-
-        // 7. Dropdown filter
+        // 7. Dropdown filter untuk tabel atas 
         $positions    = Employee::distinct()->whereNotNull('position')->orderBy('position')->pluck('position');
         $divisions    = Employee::distinct()->whereNotNull('division')->orderBy('division')->pluck('division');
         $partnerships = Employee::distinct()->whereNotNull('partnership_id')->orderBy('partnership_id')
@@ -65,22 +71,23 @@ class EmployeeController extends Controller
             ->map(fn ($id) => optional(Partnership::find($id))->name)
             ->filter()->unique()->values();
 
-        // 8. Daftar manager untuk dropdown modal (BARU)
+        // 8. Daftar untuk dropdown di dalam Modal Form (BARU)
         $managers = Employee::orderBy('first_name')->get(['id', 'first_name', 'last_name']);
+        $partnershipOptions = Partnership::orderBy('name')->get(['id', 'name']); // Mengambil ID dan Nama Tim
 
         return view('pages.hr.employee', [
-            'tableData'    => $tableData,
-            'employees'    => $employees,
-            'positions'    => $positions,
-            'divisions'    => $divisions,
-            'partnerships' => $partnerships,
-            'managers'     => $managers,   // ← baru, untuk dropdown modal
+            'activeData'         => $activeData,
+            'resignedData'       => $resignedData,
+            'employees'          => $employees,
+            'positions'          => $positions,
+            'divisions'          => $divisions,
+            'partnerships'       => $partnerships,
+            'partnershipOptions' => $partnershipOptions, // Dikirim ke modal Create/Edit
+            'managers'           => $managers,           // Dikirim ke modal Create/Edit
         ]);
     }
 
-    // =========================================================================
-    // STORE  (Create) — BARU
-    // =========================================================================
+    // STORE CREATE
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -105,9 +112,7 @@ class EmployeeController extends Controller
         ], 201);
     }
 
-    // =========================================================================
-    // UPDATE  (Edit) — BARU
-    // =========================================================================
+    // UPDATE EDIT DATA
     public function update(Request $request, int $id)
     {
         $employee = Employee::findOrFail($id);
@@ -124,7 +129,7 @@ class EmployeeController extends Controller
             'date_of_entry'  => 'required|date',
         ]);
 
-        // Cegah karyawan jadi manager dirinya sendiri
+        // agar karyawan tidak jadi manager dirinya sendiri
         if (!empty($validated['manager_id']) && $validated['manager_id'] == $employee->id) {
             return response()->json([
                 'success' => false,
@@ -142,14 +147,12 @@ class EmployeeController extends Controller
         ]);
     }
 
-    // =========================================================================
-    // DESTROY  (Delete) — tidak diubah sama sekali
-    // =========================================================================
+    // DESTROY/DELETE
     public function destroy(int $id)
     {
         try {
             $employee = Employee::findOrFail($id);
-            $employee->delete();
+            $employee->update(['status' => 'deleted']);
 
             return response()->json([
                 'success'      => true,
@@ -167,9 +170,7 @@ class EmployeeController extends Controller
         }
     }
 
-    // =========================================================================
-    // PRIVATE HELPER — transformasi 1 model Employee → array untuk tableRowData
-    // =========================================================================
+    // PRIVATE HELPER
     private function toTableRow(Employee $emp): array
     {
         $initials = strtoupper(
@@ -177,7 +178,6 @@ class EmployeeController extends Controller
             substr($emp->last_name  ?? '',  0, 1)
         );
 
-        // Warna avatar berdasarkan gender (sama seperti sebelumnya)
         if ($emp->gender === 'male') {
             $avatarBg    = 'bg-blue-100';
             $avatarColor = 'text-blue-500';
