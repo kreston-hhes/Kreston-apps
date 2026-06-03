@@ -1,9 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-<x-common.page-breadcrumb pageTitle="Employee" />
 
-<div class="w-full space-y-6" x-data="{
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<div class="w-full space-y-6 relative" x-data="{
 
     // Tab
     activeTab: '{{ request('tab', 'active') }}',
@@ -11,6 +13,34 @@
     // Data 
     activeData:   @js($activeData),
     resignedData: @js($resignedData),
+
+    perPage: 5,
+    currentPage: 1,
+
+    get currentDataset() {
+        return this.activeTab === 'active' ? this.activeData : this.resignedData;
+    },
+
+    get totalPages() {
+        if (this.currentDataset.length === 0) return 1; 
+        return Math.ceil(this.currentDataset.length / this.perPage);
+    },
+
+    get paginatedData() {
+        let start = (this.currentPage - 1) * this.perPage;
+        let end = start + parseInt(this.perPage);
+        return this.currentDataset.slice(start, end);
+    },
+
+    // Generate deret angka
+    get visiblePages() {
+        let c = this.currentPage;
+        let t = this.totalPages;
+        if (t <= 5) return Array.from({length: t}, (_, i) => i + 1); // Tampil semua jika <= 5
+        if (c <= 3) return [1, 2, 3, 4, '...', t]; // Posisi di awal
+        if (c >= t - 2) return [1, '...', t - 3, t - 2, t - 1, t]; // Posisi di akhir
+        return [1, '...', c - 1, c, c + 1, '...', t]; // Posisi di tengah
+    },
 
     // Modal Create/Edit 
     showModal: false,
@@ -26,8 +56,21 @@
     // Modal Resign
     showResignModal: false,
     isResigning: false,
-    resignForm: { id: null, name: '', release_date: '' },
+    resignForm: { id: null, name: '', release_date: '', entry_date:'' },
     resignError: '',
+    resignPicker: null,
+    
+    // Open RESIGN modal 
+    openResign(row) {
+        this.resignForm  = { id: row.id, name: row.employeeName, release_date: '', entry_date: row.date_of_entry_raw };
+        this.resignError = '';
+        this.showResignModal = true;
+
+        if (this.resignPicker) {
+                this.resignPicker.set('minDate', row.date_of_entry_raw);
+                this.resignPicker.clear();
+        }
+    },
 
     // Open CREATE
     openCreate() {
@@ -44,7 +87,7 @@
         this.errors = {};
         this.form = {
             id:             row.id,
-            nik:            row.nik              ?? '',
+            nik:            row.nik             ?? '',
             first_name:     row.first_name       ?? '',
             last_name:      row.last_name        ?? '',
             gender:         row.gender           ?? '',
@@ -101,12 +144,6 @@
         }
     },
 
-    // Open RESIGN modal 
-    openResign(row) {
-        this.resignForm  = { id: row.id, name: row.employeeName, release_date: '' };
-        this.resignError = '';
-        this.showResignModal = true;
-    },
 
     // Submit RESIGN 
     async submitResign() {
@@ -180,116 +217,136 @@
 
     {{-- MODAL CREATE / EDIT --}}
     <div x-show="showModal" x-cloak
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        class="absolute inset-0 z-50 w-screen h-screen overflow-y-auto bg-black/50 backdrop-blur-sm px-4 pt-2  pb-10"
         @keydown.escape.window="showModal = false">
-        <div class="relative w-full max-w-2xl mx-4 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden" @click.stop>
-            <!-- Header -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-white/[0.05]">
+    
+        <div class="relative w-full max-w-lg bg-white dark:bg-gray-800 border border-transparent dark:border-gray-700 rounded-2xl shadow-2xl my-8 flex flex-col" @click.stop>
+            
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                 <h2 class="text-base font-semibold text-gray-800 dark:text-white"
                     x-text="modalMode === 'create' ? 'Add New Employee' : 'Edit Employee'"></h2>
-                <button @click="showModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
+                <button @click="showModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
                     <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            <!-- Body -->
-            <div class="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
-                <!-- NIK & Entry Date -->
+            
+            <div class="px-6 py-5 space-y-4">
+                
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">NIK <span class="text-red-500">*</span></label>
                         <input type="text" x-model="form.nik" placeholder="e.g. EMP-0001"
-                            class="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white dark:border-gray-600"
                             :class="errors.nik ? 'border-red-400' : 'border-gray-300'">
                         <p x-show="errors.nik" x-text="errors.nik?.[0]" class="mt-1 text-xs text-red-500"></p>
                     </div>
                     <div>
                         <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Entry Date <span class="text-red-500">*</span></label>
-                        <input type="date" x-model="form.date_of_entry"
-                            class="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                        <input type="text" x-model="form.date_of_entry"
+                            x-init="flatpickr($el, { 
+                                dateFormat: 'Y-m-d', 
+                                altInput: true, 
+                                altFormat: 'd M Y', 
+                                maxDate: 'today' /* 🟢 Kalender di masa depan akan dikunci/abu-abu */
+                            })"
+                            placeholder="Pilih Tanggal Masuk..."
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white dark:border-gray-600"
                             :class="errors.date_of_entry ? 'border-red-400' : 'border-gray-300'">
                         <p x-show="errors.date_of_entry" x-text="errors.date_of_entry?.[0]" class="mt-1 text-xs text-red-500"></p>
                     </div>
                 </div>
-                <!-- First & Last Name -->
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">First Name <span class="text-red-500">*</span></label>
                         <input type="text" x-model="form.first_name" placeholder="First name"
-                            class="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white dark:border-gray-600"
                             :class="errors.first_name ? 'border-red-400' : 'border-gray-300'">
                         <p x-show="errors.first_name" x-text="errors.first_name?.[0]" class="mt-1 text-xs text-red-500"></p>
                     </div>
                     <div>
-                        <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Last Name</label>
+                        <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Last Name <span class="text-red-500">*</span></label>
                         <input type="text" x-model="form.last_name" placeholder="Last name"
-                            class="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white dark:border-gray-600"
                             :class="errors.last_name ? 'border-red-400' : 'border-gray-300'">
                         <p x-show="errors.last_name" x-text="errors.last_name?.[0]" class="mt-1 text-xs text-red-500"></p>
                     </div>
                 </div>
-                <!-- Gender & Position -->
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Gender</label>
+                        <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Gender <span class="text-red-500">*</span></label>
                         <select x-model="form.gender"
-                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white dark:border-gray-600"
+                            :class="errors.gender ? 'border-red-400' : 'border-gray-300'">
                             <option value="">— Select Gender —</option>
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                         </select>
+                        <p x-show="errors.gender" x-text="errors.gender?.[0]" class="mt-1 text-xs text-red-500"></p>
                     </div>
                     <div>
-                        <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Position</label>
+                        <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Position <span class="text-red-500">*</span></label>
                         <select x-model="form.position"
-                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white dark:border-gray-600"
+                            :class="errors.position ? 'border-red-400' : 'border-gray-300'">
                             <option value="">— Select Position —</option>
                             @foreach($positions as $pos)
                                 <option value="{{ $pos }}">{{ $pos }}</option>
                             @endforeach
                         </select>
+                        <p x-show="errors.position" x-text="errors.position?.[0]" class="mt-1 text-xs text-red-500"></p>
                     </div>
                 </div>
-                <!-- Division & Team -->
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Division</label>
+                        <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Division <span class="text-red-500">*</span></label>
                         <select x-model="form.division"
-                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white dark:border-gray-600"
+                            :class="errors.division ? 'border-red-400' : 'border-gray-300'">
                             <option value="">— Select Division —</option>
                             @foreach($divisions as $div)
                                 <option value="{{ $div }}">{{ $div }}</option>
                             @endforeach
                         </select>
+                        <p x-show="errors.division" x-text="errors.division?.[0]" class="mt-1 text-xs text-red-500"></p>
                     </div>
                     <div>
-                        <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Team</label>
+                        <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Team <span class="text-red-500">*</span></label>
                         <select x-model="form.partnership_id"
-                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white dark:border-gray-600"
+                            :class="errors.partnership_id ? 'border-red-400' : 'border-gray-300'">
                             <option value="">— Select Team —</option>
-                            @foreach($partnershipOptions as $p)
-                                <option value="{{ $p->id }}">{{ $p->name }}</option>
-                            @endforeach
+                            @if(isset($partnershipOptions))
+                                @foreach($partnershipOptions as $p)
+                                    <option value="{{ $p->id }}">{{ $p->name }}</option>
+                                @endforeach
+                            @endif
                         </select>
                         <p x-show="errors.partnership_id" x-text="errors.partnership_id?.[0]" class="mt-1 text-xs text-red-500"></p>
                     </div>
                 </div>
-                <!-- Manager -->
+
                 <div>
-                    <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Manager</label>
+                    <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Manager <span class="text-red-500">*</span></label>
                     <select x-model="form.manager_id"
-                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white dark:border-gray-600"
+                        :class="errors.manager_id ? 'border-red-400' : 'border-gray-300'">
                         <option value="">— No Manager —</option>
-                        @foreach($managers as $mgr)
-                            <option value="{{ $mgr->id }}">{{ $mgr->first_name }} {{ $mgr->last_name }}</option>
-                        @endforeach
+                        @if(isset($managers))
+                            @foreach($managers as $mgr)
+                                <option value="{{ $mgr->id }}">{{ $mgr->first_name }} {{ $mgr->last_name }}</option>
+                            @endforeach
+                        @endif
                     </select>
                     <p x-show="errors.manager_id" x-text="errors.manager_id?.[0]" class="mt-1 text-xs text-red-500"></p>
                 </div>
             </div>
-            <!-- Footer -->
-            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 dark:border-white/[0.05]">
+            
+            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 dark:border-gray-700">
                 <button @click="showModal = false"
-                    class="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 transition-colors">
+                    class="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
                     Cancel
                 </button>
                 <button @click="submitForm()" :disabled="isSubmitting"
@@ -303,8 +360,7 @@
             </div>
         </div>
     </div>
-
-    {{-- MODAL RESIGN --}}
+        {{-- MODAL RESIGN --}}
     <div x-show="showResignModal" x-cloak
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
         @keydown.escape.window="showResignModal = false">
@@ -324,7 +380,14 @@
                 </p>
                 <div>
                     <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Tanggal Resign <span class="text-red-500">*</span></label>
-                    <input type="date" x-model="resignForm.release_date"
+                    <input type="text" x-model="resignForm.release_date"
+                        x-init="resignPicker = flatpickr($el, { 
+                            dateFormat: 'Y-m-d', 
+                            altInput: true, 
+                            altFormat: 'd M Y', 
+                            maxDate: 'today'
+                        })"
+                        placeholder="Pilih Tanggal Resign..."
                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                         :class="resignError ? 'border-red-400' : 'border-gray-300'">
                     <p x-show="resignError" x-text="resignError" class="mt-1 text-xs text-red-500"></p>
@@ -337,7 +400,7 @@
                     Cancel
                 </button>
                 <button @click="submitResign()" :disabled="isResigning"
-                    class="px-4 py-2 text-sm font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
                     <svg x-show="isResigning" class="size-4 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
@@ -361,7 +424,7 @@
                 Active Employees
                 <span class="ml-1.5 px-1.5 py-0.5 text-xs rounded-full"
                     :class="activeTab === 'active' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'"
-                    x-text="activeData.length"></span>
+                    x-text="activeData.length">{{$totalActive}}</span>
             </button>
             <button @click="activeTab = 'resigned'"
                 :class="activeTab === 'resigned'
@@ -371,7 +434,7 @@
                 Resigned
                 <span class="ml-1.5 px-1.5 py-0.5 text-xs rounded-full"
                     :class="activeTab === 'resigned' ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-500'"
-                    x-text="resignedData.length"></span>
+                    x-text="resignedData.length">{{$totalResigned}}</span>
             </button>
         </div>
 
@@ -427,7 +490,7 @@
             </div>
         </div>
 
-        <!-- ── TAB ACTIVE ── -->
+        <!-- ── Tab Active── -->
         <div x-show="activeTab === 'active'">
             <div class="max-w-full overflow-x-auto">
                 <table class="w-full">
@@ -463,7 +526,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <template x-for="row in activeData" :key="row.id">
+                        <template x-for="(row, index) in paginatedData" :key="row.id || index">
                             <tr class="border-b border-gray-100 dark:border-white/[0.05] hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                                 <td class="px-6 py-3.5 text-theme-sm text-gray-700 dark:text-gray-400" x-text="row.nik"></td>
                                 <td class="px-6 py-3.5">
@@ -547,7 +610,7 @@
             </div>
         </div>
 
-        <!-- ── TAB RESIGNED ── -->
+        <!-- ── Tab Resigned ── -->
         <div x-show="activeTab === 'resigned'">
             <div class="max-w-full overflow-x-auto">
                 <table class="w-full">
@@ -582,7 +645,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <template x-for="row in resignedData" :key="row.id">
+                        <template x-for="(row, index) in paginatedData" :key="row.id || index">
                             <tr class="border-b border-gray-100 dark:border-white/[0.05] hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                                 <td class="px-6 py-3.5 text-theme-sm text-gray-500 dark:text-gray-500" x-text="row.nik"></td>
                                 <td class="px-6 py-3.5">
@@ -591,7 +654,7 @@
                                             <span x-text="row.initials"></span>
                                         </div>
                                         <div>
-                                            <span class="block text-theme-sm font-medium text-gray-500 dark:text-gray-500 line-through" x-text="row.employeeName"></span>
+                                            <span class="block text-theme-sm font-medium text-gray-500 dark:text-gray-500" x-text="row.employeeName"></span>
                                             <span class="text-xs text-gray-400" x-text="row.position"></span>
                                         </div>
                                     </div>
@@ -616,22 +679,57 @@
 
         <!-- Pagination -->
         <div class="flex flex-col items-center justify-between gap-4 px-6 py-4 border-t border-gray-100 sm:flex-row dark:border-white/[0.05]">
+            
             <div class="flex items-center gap-2">
                 <p class="text-sm text-gray-500 dark:text-gray-400">Show</p>
-                <select onchange="window.location.href = this.value"
-                    class="block px-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-transparent text-gray-800 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
-                    @foreach([5, 10, 20, 25] as $size)
-                        <option value="{{ request()->fullUrlWithQuery(['per_page' => $size]) }}"
-                            {{ request('per_page') == $size ? 'selected' : '' }}>{{ $size }}</option>
-                    @endforeach
+                <select x-model.number="perPage" @change="currentPage = 1"
+                    class="block px-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-transparent text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="25">25</option>
                 </select>
                 <p class="text-sm text-gray-500 dark:text-gray-400">entries</p>
             </div>
-            <div class="pagination-links text-sm text-gray-500 dark:text-gray-400">
-                {{ $employees->links() }}
+            
+            <div class="flex items-center gap-1 sm:gap-2" x-show="totalPages > 1" x-cloak>
+                
+                <button @click="currentPage--" :disabled="currentPage === 1"
+                    class="px-3 py-1.5 text-sm font-medium border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.05] transition-colors">
+                    Prev
+                </button>
+                
+                <div class="flex items-center gap-1">
+                    <template x-for="(page, index) in visiblePages" :key="index">
+                        <button 
+                            @click="if(page !== '...') currentPage = page"
+                            :class="{
+                                'bg-blue-600 text-white border-blue-600 shadow-md': currentPage === page,
+                                'text-gray-600 border-transparent hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/[0.05]': currentPage !== page && page !== '...',
+                                'text-gray-400 cursor-default border-transparent': page === '...'
+                            }"
+                            class="px-3 py-1.5 text-sm font-medium border rounded-lg transition-colors"
+                            x-text="page"
+                            :disabled="page === '...'">
+                        </button>
+                    </template>
+                </div>
+
+                <button @click="currentPage++" :disabled="currentPage === totalPages"
+                    class="px-3 py-1.5 text-sm font-medium border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.05] transition-colors">
+                    Next
+                </button>
+                
+                <div class="flex items-center gap-2 pl-2 sm:pl-4 sm:ml-2 sm:border-l border-gray-200 dark:border-white/[0.05]">
+                    <span class="text-sm text-gray-500 dark:text-gray-400">Go to</span>
+                    <input type="number" min="1" :max="totalPages"
+                        @keyup.enter="let p = parseInt($event.target.value); if(p >= 1 && p <= totalPages) { currentPage = p; } $event.target.value = ''"
+                        @blur="let p = parseInt($event.target.value); if(p >= 1 && p <= totalPages) { currentPage = p; } $event.target.value = ''"
+                        class="w-12 h-8 px-1 text-sm text-center bg-transparent border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:text-white"
+                        placeholder="#">
+                </div>
             </div>
         </div>
-
-    </div>
-</div>
+    </div> 
+</div> 
 @endsection

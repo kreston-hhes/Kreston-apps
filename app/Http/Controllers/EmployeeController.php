@@ -71,20 +71,30 @@ class EmployeeController extends Controller {
             ->map(fn ($id) => optional(Partnership::find($id))->name)
             ->filter()->unique()->values();
 
-        // 8. Daftar untuk dropdown di dalam Modal Form (BARU)
-        $managers = Employee::orderBy('first_name')->get(['id', 'first_name', 'last_name']);
-        $partnershipOptions = Partnership::orderBy('name')->get(['id', 'name']); // Mengambil ID dan Nama Tim
+        // 8. Daftar untuk dropdown di dalam Modal Form 
+        $managers = Employee::where('position', 'LIKE', '%Manager%') 
+            ->where(function ($q) {
+                $q->where('status', '!=', 'deleted')->orWhereNull('status');
+            })
+            ->where('status', '!=', 'resigned') 
+            ->orderBy('first_name')
+            ->get(['id', 'first_name', 'last_name']);
+        $partnershipOptions = Partnership::orderBy('name')->get(['id', 'name']); 
+        $totalActive = \App\Models\Employee::where('status', 'active')->count(); 
+        $totalResigned = \App\Models\Employee::where('status', 'resigned')->count();
 
-        return view('pages.hr.employee', [
-            'activeData'         => $activeData,
-            'resignedData'       => $resignedData,
-            'employees'          => $employees,
-            'positions'          => $positions,
-            'divisions'          => $divisions,
-            'partnerships'       => $partnerships,
-            'partnershipOptions' => $partnershipOptions, // Dikirim ke modal Create/Edit
-            'managers'           => $managers,           // Dikirim ke modal Create/Edit
-        ]);
+    return view('pages.hr.employee', [
+        'activeData'         => $activeData,
+        'resignedData'       => $resignedData,
+        'employees'          => $employees,
+        'positions'          => $positions,
+        'divisions'          => $divisions,
+        'partnerships'       => $partnerships,
+        'partnershipOptions' => $partnershipOptions, 
+        'managers'           => $managers,          
+        'totalActive'        => $totalActive,
+        'totalResigned'      => $totalResigned,
+    ]);
     }
 
     // STORE CREATE
@@ -99,7 +109,7 @@ class EmployeeController extends Controller {
             'division'       => 'nullable|string|max:100',
             'partnership_id' => 'nullable|exists:partnerships,id',
             'manager_id'     => 'nullable|exists:employees,id',
-            'date_of_entry'  => 'required|date',
+            'date_of_entry'  => 'required|date|before_or_equal:today',
         ]);
 
         $employee = Employee::create($validated);
@@ -126,7 +136,7 @@ class EmployeeController extends Controller {
             'division'       => 'nullable|string|max:100',
             'partnership_id' => 'nullable|exists:partnerships,id',
             'manager_id'     => 'nullable|exists:employees,id',
-            'date_of_entry'  => 'required|date',
+            'date_of_entry'  => 'required|date|before_or_equal:today',
         ]);
 
         // agar karyawan tidak jadi manager dirinya sendiri
@@ -145,6 +155,46 @@ class EmployeeController extends Controller {
             'message'  => trim("{$employee->first_name} {$employee->last_name}") . ' berhasil diperbarui.',
             'employee' => $this->toTableRow($employee),
         ]);
+    }
+
+    // PROSES RESIGN
+    public function resign(Request $request, int $id)
+    {
+        $employee = Employee::findOrFail($id);
+
+        $validated = $request->validate([
+            'release_date' => [
+                'required',
+                'date',
+                'before_or_equal:today', // maksimal hari ini
+                'after_or_equal:' . $employee->date_of_entry // minimal sama dengan tanggal masuknya
+            ],
+        ], [
+            'release_date.before_or_equal' => 'Tanggal resign tidak boleh melebihi hari ini.',
+            'release_date.after_or_equal'  => 'Tanggal resign harus setelah tanggal masuk kerja (' . date('d M Y', strtotime($employee->date_of_entry)) . ').'
+        ]);
+
+        try {
+            $employee = Employee::findOrFail($id);
+            
+            $employee->update([
+                'status'       => 'resigned',
+                'release_date' => $validated['release_date'], 
+            ]);
+
+            $employee->load(['partnership', 'manager']);
+
+            return response()->json([
+                'success'  => true,
+                'message'  => trim("{$employee->first_name} {$employee->last_name}") . ' berhasil ditandai sebagai resign.',
+                'employee' => $this->toTableRow($employee),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     // DESTROY/DELETE
@@ -213,6 +263,9 @@ class EmployeeController extends Controller {
             'date_of_entry_raw' => $emp->date_of_entry
                                     ? date('Y-m-d', strtotime($emp->date_of_entry))
                                     : '',
+            'release_date'      => $emp->release_date 
+                                    ? date('d M Y', strtotime($emp->release_date))
+                                    : '-',
         ];
     }
 }

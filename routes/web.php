@@ -111,6 +111,10 @@ Route::put('/password-update', [DashboardController::class, 'updatePassword'])->
         // DELETE — hapus karyawan
         Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])
             ->name('employees.destroy');
+            
+        // Resigned
+        Route::patch('/employees/{id}/resign', [App\Http\Controllers\EmployeeController::class, 'resign'])
+            ->name('employees.resign');
 
     });
 

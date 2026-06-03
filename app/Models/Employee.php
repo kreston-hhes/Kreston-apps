@@ -21,6 +21,7 @@ class Employee extends Model
         'position',
         'division',
         'date_of_entry',
+        'status',
         'release_date',
         'partnership_id',
         'manager_id',
