@@ -10,7 +10,7 @@ class EmployeeController extends Controller {
     public function index(Request $request) {
         // 1. Inisialisasi Query Builder
         $query = Employee::with(['partnership', 'manager'])
-        ->where(function ($q) { 
+        ->where(function ($q) {
                 // memastikan yang statusnya 'deleted' tidak ikut terbawa
                 $q->where('status', '!=', 'deleted')->orWhereNull('status');
             });
@@ -49,21 +49,20 @@ class EmployeeController extends Controller {
             $query->orderBy('created_at', 'desc');
         }
 
-        // 5. Pagination
-        $perPage   = min($request->input('per_page', 5), 25);
-        $employees = $query->paginate($perPage)->withQueryString();
-        
-        $activeEmployees = collect($employees->items())->filter(function ($emp) {
-        return $emp->status !== 'resigned';
+        // 5. Ambil semua data hasil filter/sort untuk pagination client-side
+        $employees = $query->get();
+
+        $activeEmployees = $employees->filter(function ($emp) {
+            return $emp->status !== 'resigned';
         });
-        $resignedEmployees = collect($employees->items())->filter(function ($emp) {
-        return $emp->status === 'resigned';
+        $resignedEmployees = $employees->filter(function ($emp) {
+            return $emp->status === 'resigned';
         });
-        // 6. Transformasi Data untuk View 
+        // 6. Transformasi Data untuk View
         $activeData   = $activeEmployees->map(fn ($emp) => $this->toTableRow($emp))->values();
         $resignedData = $resignedEmployees->map(fn ($emp) => $this->toTableRow($emp))->values();
 
-        // 7. Dropdown filter untuk tabel atas 
+        // 7. Dropdown filter untuk tabel atas
         $positions    = Employee::distinct()->whereNotNull('position')->orderBy('position')->pluck('position');
         $divisions    = Employee::distinct()->whereNotNull('division')->orderBy('division')->pluck('division');
         $partnerships = Employee::distinct()->whereNotNull('partnership_id')->orderBy('partnership_id')
@@ -71,16 +70,16 @@ class EmployeeController extends Controller {
             ->map(fn ($id) => optional(Partnership::find($id))->name)
             ->filter()->unique()->values();
 
-        // 8. Daftar untuk dropdown di dalam Modal Form 
-        $managers = Employee::where('position', 'LIKE', '%Manager%') 
+        // 8. Daftar untuk dropdown di dalam Modal Form
+        $managers = Employee::where('position', 'LIKE', '%Manager%')
             ->where(function ($q) {
                 $q->where('status', '!=', 'deleted')->orWhereNull('status');
             })
-            ->where('status', '!=', 'resigned') 
+            ->where('status', '!=', 'resigned')
             ->orderBy('first_name')
             ->get(['id', 'first_name', 'last_name']);
-        $partnershipOptions = Partnership::orderBy('name')->get(['id', 'name']); 
-        $totalActive = \App\Models\Employee::where('status', 'active')->count(); 
+        $partnershipOptions = Partnership::orderBy('name')->get(['id', 'name']);
+        $totalActive = \App\Models\Employee::where('status', 'active')->count();
         $totalResigned = \App\Models\Employee::where('status', 'resigned')->count();
 
     return view('pages.hr.employee', [
@@ -90,8 +89,8 @@ class EmployeeController extends Controller {
         'positions'          => $positions,
         'divisions'          => $divisions,
         'partnerships'       => $partnerships,
-        'partnershipOptions' => $partnershipOptions, 
-        'managers'           => $managers,          
+        'partnershipOptions' => $partnershipOptions,
+        'managers'           => $managers,
         'totalActive'        => $totalActive,
         'totalResigned'      => $totalResigned,
     ]);
@@ -176,10 +175,10 @@ class EmployeeController extends Controller {
 
         try {
             $employee = Employee::findOrFail($id);
-            
+
             $employee->update([
                 'status'       => 'resigned',
-                'release_date' => $validated['release_date'], 
+                'release_date' => $validated['release_date'],
             ]);
 
             $employee->load(['partnership', 'manager']);
@@ -263,7 +262,7 @@ class EmployeeController extends Controller {
             'date_of_entry_raw' => $emp->date_of_entry
                                     ? date('Y-m-d', strtotime($emp->date_of_entry))
                                     : '',
-            'release_date'      => $emp->release_date 
+            'release_date'      => $emp->release_date
                                     ? date('d M Y', strtotime($emp->release_date))
                                     : '-',
         ];
