@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\AssetItController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PublicTicketController;
+use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -67,7 +69,13 @@ Route::put('/password-update', [DashboardController::class, 'updatePassword'])->
     */
 
     Route::middleware(['division:IT'])->group(function () {
-        // Tambahkan rute khusus untuk IT di sini
+
+    /*
+|--------------------------------------------------------------------------
+| Ticket Support
+|--------------------------------------------------------------------------
+|
+*/
        //Route to Ticket Support
     Route::get('/ticket-support', [DashboardController::class, 'showTicketSupport'])->name('ticket-support');
 

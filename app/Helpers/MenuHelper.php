@@ -23,7 +23,7 @@ class MenuHelper
             ],
 
             [
-                
+
                 'icon' => 'hr',
                 'name' => 'HR',
 
@@ -37,18 +37,20 @@ class MenuHelper
             ],
 
             [
-                'name' => 'Administrator',
-                'icon' => 'admin',
 
-                // hanya IT yang bisa lihat
+                'icon' => 'admin',
+                'name' => 'IT',
+
+                // hanya division tertentu yang bisa lihat
                 'allowed_divisions' => ['IT'],
 
                 'subItems' => [
-                    ['name' => 'Privilege', 'path' => '/#'],
-                    ['name' => 'Reference content', 'path' => '/#'],
-                    ['name' => 'Log', 'path' => '/#'],
+                    ['name' => 'Asset', 'path' => '/asset-it'],
                 ],
             ],
+
+
+
         ];
 
         return self::filterMenuByDivision($menus, $division);
@@ -100,7 +102,7 @@ class MenuHelper
                 'title' => 'Menu',
                 'items' => self::getMainNavItems()
             ],
-      
+
         ];
     }
 
