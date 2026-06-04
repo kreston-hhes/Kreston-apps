@@ -35,7 +35,7 @@ return new class extends Migration
             // connect to users table
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
 
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->enum('status', ['active', 'inactive', 'resigned', 'deleted'])->default('active');
             
             $table->timestamps();
         });

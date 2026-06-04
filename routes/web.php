@@ -9,16 +9,9 @@ use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
-/*
-|--------------------------------------------------------------------------
-| PUBLIC TICKET DOMAIN
-|--------------------------------------------------------------------------
-| tickets.kreston.co.id
-*/
-
+// PUBLIC TICKET DOMAIN
 
 Route::domain('ticket.' . env('APP_SHORT_URL', 'kreston.id'))->group(function () {
-
 
 Route::get('/', [PublicTicketController::class, 'index'])
         ->name('public-ticket.form');
@@ -28,17 +21,10 @@ Route::get('/', [PublicTicketController::class, 'index'])
 Route::get('/{ticketNumber}', [PublicTicketController::class, 'checkStatus'])
     ->name('public-ticket.status');
 
-
 });
 
+//INTERNAL APPS DOMAIN
 
-
-/*
-|--------------------------------------------------------------------------
-| INTERNAL APPS DOMAIN
-|--------------------------------------------------------------------------
-| apps.kreston.co.id
-*/
 Route::domain('apps.' . env('APP_SHORT_URL', 'kreston.id'))->group(function () {
 // 1. Rute TAMU (Bisa diakses tanpa login)
 Route::middleware('guest')->group(function () {
@@ -73,16 +59,13 @@ Route::put('/profile', [DashboardController::class, 'updateProfile'])->name('pro
 //change password
 Route::put('/password-update', [DashboardController::class, 'updatePassword'])->name('password.update');
 
-
-
-
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     /*
     |--------------------------------------------------------------------------
     | IT MENU
     |--------------------------------------------------------------------------
-    | Hanya division IT
+    | Hanya divisi IT
     */
 
     Route::middleware(['division:IT'])->group(function () {
@@ -109,35 +92,37 @@ Route::put('/password-update', [DashboardController::class, 'updatePassword'])->
     // Close a ticket (in_progress -> closed)
     Route::post('/ticket-support/{id}/close', [DashboardController::class, 'closeTicket'])->name('ticket-close');
 
-    /*
-|--------------------------------------------------------------------------
-| Asset IT
-|--------------------------------------------------------------------------
-|
-*/
-
-Route::get('/asset-it',[AssetItController::class, 'index'])->name('asset-it.index');
-
-Route::get('/test-form',[TestController::class, 'index'])->name('test-form.index');
-Route::post('/test-form',[TestController::class, 'store'])->name('test-form.store');
-
-    });//end IT menu
+    });
 
 
 /*
     |--------------------------------------------------------------------------
     | HR MENU
     |--------------------------------------------------------------------------
-    | Hanya division HR dan IT
+    | Hanya divisiHR dan IT
     */
 
     Route::middleware(['division:HR,IT'])->group(function () {
 
+        // READ — daftar karyawan
         Route::get('/employee', [EmployeeController::class, 'index'])
             ->name('employees.index');
 
+        // CREATE — simpan karyawan baru  ← BARU
+        Route::post('/employees', [EmployeeController::class, 'store'])
+            ->name('employees.store');
+
+        // UPDATE — edit karyawan  ← BARU
+        Route::put('/employees/{id}', [EmployeeController::class, 'update'])
+            ->name('employees.update');
+
+        // DELETE — hapus karyawan
         Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])
             ->name('employees.destroy');
+            
+        // Resigned
+        Route::patch('/employees/{id}/resign', [App\Http\Controllers\EmployeeController::class, 'resign'])
+            ->name('employees.resign');
 
     });
 
@@ -150,10 +135,6 @@ Route::get('/', function () {
 
 
 });
-
-
-
-
 
 
 //batas fitur nanti akan di hapus jika sudah tidak dibutuhkan
@@ -229,25 +210,3 @@ Route::get('/image', function () {
 Route::get('/videos', function () {
     return view('pages.ui-elements.videos', ['title' => 'Videos']);
 })->name('videos');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
