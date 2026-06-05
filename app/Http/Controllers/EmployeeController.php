@@ -63,8 +63,8 @@ class EmployeeController extends Controller {
         $resignedData = $resignedEmployees->map(fn ($emp) => $this->toTableRow($emp))->values();
 
         // 7. Dropdown filter untuk tabel atas
-        $positions    = Employee::distinct()->whereNotNull('position')->orderBy('position')->pluck('position');
-        $divisions    = Employee::distinct()->whereNotNull('division')->orderBy('division')->pluck('division');
+        $positions    = Employee::distinct()->whereNotNull('position')->where('position', '!=', '')->orderBy('position')->pluck('position');
+        $divisions    = Employee::distinct()->whereNotNull('division')->where('division', '!=', '')->orderBy('division')->pluck('division');
         $partnerships = Employee::distinct()->whereNotNull('partnership_id')->orderBy('partnership_id')
             ->pluck('partnership_id')
             ->map(fn ($id) => optional(Partnership::find($id))->name)
