@@ -4,7 +4,12 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
+    <style>
+        .dark .flatpickr-monthDropdown-months option {
+            color: #ffffff !important;          
+            background-color: #1f2937 !important;
+        }
+    </style>
     <div class="w-full space-y-6 relative" x-data="{
     
         // Tab
@@ -273,7 +278,12 @@
                                 dateFormat: 'Y-m-d',
                                 altInput: true,
                                 altFormat: 'd M Y',
-                                maxDate: 'today' /* 🟢 Kalender di masa depan akan dikunci/abu-abu */
+                                disable: [
+                                    function(date) {
+                                        // mengunci seluruh tanggal yang lebih besar dari hari ini
+                                        return date > new Date();
+                                    }
+                                ]
                             })"
                                 placeholder="Pilih Tanggal Masuk..."
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white dark:border-gray-600"
