@@ -441,8 +441,15 @@
                             dateFormat: 'Y-m-d',
                             altInput: true,
                             altFormat: 'd M Y',
-                            maxDate: 'today'
+                            changeMonth: true,   
+                            changeYear: true,      
+                            disable: [
+                                function(date) {
+                                    return date > new Date();
+                                }
+                            ]
                         })"
+                   
                             placeholder="Pilih Tanggal Resign..."
                             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                             :class="resignError ? 'border-red-400' : 'border-gray-300'">
