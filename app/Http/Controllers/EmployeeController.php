@@ -42,13 +42,22 @@ class EmployeeController extends Controller {
         $sortField = $request->input('sort', 'created_at');
         $sortOrder = $request->input('direction', 'desc');
 
-        $allowedSorts = ['nik', 'first_name', 'position', 'division', 'date_of_entry'];
+        $allowedSorts = ['nik', 'first_name', 'position', 'division', 'date_of_entry', 'partnership'];
         if (in_array($sortField, $allowedSorts)) {
-            $query->orderBy($sortField, $sortOrder);
+            if ($sortField === 'partnership') {
+                // sub query mengurutkan berdasarkan nama tim dari tabel sebelah
+                $query->orderBy(
+                    \App\Models\Partnership::select('name')
+                        ->whereColumn('partnerships.id', 'employees.partnership_id'),
+                    $sortOrder
+                );
+            } else {
+                // Sorting normal untuk kolom lainnya
+                $query->orderBy($sortField, $sortOrder);
+            }
         } else {
             $query->orderBy('created_at', 'desc');
         }
-
         // 5. Ambil semua data hasil filter/sort untuk pagination client-side
         $employees = $query->get();
 
