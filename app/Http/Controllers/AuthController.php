@@ -41,7 +41,7 @@ public function login(Request $request): RedirectResponse
         }
 
         AlertService::notify('success', 'Login Successful', 'Welcome back!');
-        return redirect()->intended(route('dashboard'));
+        return redirect()->route('dashboard');
     }
 
     AlertService::notify('error', 'Login Failed', 'Email or password is incorrect.');
