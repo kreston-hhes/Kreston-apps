@@ -273,7 +273,24 @@
                         </div>
                         <div>
                         <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">
-        7
+                            Entry Date <span class="text-gray-400 font-normal">(Opsional)</span>
+                        </label>
+                        <input type="text" x-model="form.date_of_entry" x-init="flatpickr($el, {
+                            dateFormat: 'Y-m-d',
+                            altInput: true,
+                            altFormat: 'd M Y',
+                            disable: [
+                                function(date) {
+                                    // mengunci seluruh tanggal yang lebih besar dari hari ini
+                                    return date > new Date();
+                                }
+                            ]
+                        })"
+                            placeholder="Pilih Tanggal Masuk..."
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white dark:border-gray-600"
+                            :class="errors.date_of_entry ? 'border-red-400' : 'border-gray-300'">
+                        <p x-show="errors.date_of_entry" x-text="errors.date_of_entry?.[0]"
+                            class="mt-1 text-xs text-red-500"></p>
                         </div>
                     </div>
 
