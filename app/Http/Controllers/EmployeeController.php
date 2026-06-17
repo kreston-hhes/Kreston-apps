@@ -113,9 +113,9 @@ class EmployeeController extends Controller {
             'first_name'     => 'required|string|max:100',
             'last_name'      => 'nullable|string|max:100',
             'gender'         => 'nullable|in:male,female',
-            'position'       => 'nullable|string|max:100',
-            'division'       => 'nullable|string|max:100',
-            'partnership_id' => 'nullable|exists:partnerships,id',
+            'position'       => 'required|string|max:100',
+            'division'       => 'required|string|max:100',
+            'partnership_id' => 'required|exists:partnerships,id',
             'manager_id'     => 'nullable|exists:employees,id',
             'date_of_entry'  => 'required|date|before_or_equal:today',
         ]);
@@ -140,11 +140,11 @@ class EmployeeController extends Controller {
             'first_name'     => 'required|string|max:100',
             'last_name'      => 'nullable|string|max:100',
             'gender'         => 'nullable|in:male,female',
-            'position'       => 'nullable|string|max:100',
-            'division'       => 'nullable|string|max:100',
-            'partnership_id' => 'nullable|exists:partnerships,id',
+            'position'       => 'required|string|max:100',
+            'division'       => 'required|string|max:100',
+            'partnership_id' => 'required|exists:partnerships,id',
             'manager_id'     => 'nullable|exists:employees,id',
-            'date_of_entry'  => 'required|date|before_or_equal:today',
+            'date_of_entry'  => 'nullable|date|before_or_equal:today',
         ]);
 
         // agar karyawan tidak jadi manager dirinya sendiri
