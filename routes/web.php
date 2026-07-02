@@ -31,6 +31,8 @@ Route::middleware('guest')->group(function () {
     Route::get('/signin', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/signin', [AuthController::class, 'login']);
 
+
+
     // Forgot Password Routes
     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
     Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
@@ -40,7 +42,8 @@ Route::middleware('guest')->group(function () {
 
 // 2. Rute TERPROTEKSI
 Route::middleware('auth')->group(function () {
-
+  Route::get('/test-form', [TestController::class, 'index']);
+    Route::post('/test-form', [TestController::class, 'store']);
     /*
     |--------------------------------------------------------------------------
     | Umum
@@ -119,7 +122,7 @@ Route::put('/password-update', [DashboardController::class, 'updatePassword'])->
         // DELETE — hapus karyawan
         Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])
             ->name('employees.destroy');
-            
+
         // Resigned
         Route::patch('/employees/{id}/resign', [App\Http\Controllers\EmployeeController::class, 'resign'])
             ->name('employees.resign');

@@ -15,9 +15,15 @@ class TestController extends Controller
 
 public function store(Request $request)
     {
+        $categories = $request->input('category', []);
+
         return back()->with('success', [
-            'name' => $request->name,
-            'category' => $request->category,
+            'name' => $request->input('name'),
+            'category' => is_array($categories) ? $categories : [$categories],
+            'kota' => $request->input('kota'),
+            'gender' => $request->input('gender'),
+            'agree' => $request->has('agree') ? 'Yes' : 'No',
+            'permissions' => $request->input('permissions', []),
         ]);
     }
 }

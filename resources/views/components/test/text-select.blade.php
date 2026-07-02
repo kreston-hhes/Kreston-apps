@@ -1,7 +1,7 @@
 @props(['name', 'label' => '', 'requiredMessage' => 'Dipilih dulu dong'])
 
 <div x-data x-init="new TomSelect($refs.select, {
-    create: false,
+    create: true,
     sortField: {
         field: 'text',
         direction: 'asc'
