@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\AssetItController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\DashboardController;
@@ -8,6 +7,7 @@ use App\Http\Controllers\PublicTicketController;
 use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\AssetController;
 
 // PUBLIC TICKET DOMAIN
 
@@ -72,6 +72,17 @@ Route::put('/password-update', [DashboardController::class, 'updatePassword'])->
     */
 
     Route::middleware(['division:IT'])->group(function () {
+
+    /*
+|--------------------------------------------------------------------------
+| Asset Management
+|--------------------------------------------------------------------------
+|
+*/
+
+Route::get('/assets', [AssetController::class, 'index'])->name('assets.index');
+Route::post('/assets', [AssetController::class, 'store'])->name('assets.store');
+
 
     /*
 |--------------------------------------------------------------------------

@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('asset_its', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+      Schema::create('asset_categories', function (Blueprint $table) {
+        $table->id();
+        $table->string('name', 50); // Contoh: Hardware, Software, Network
+        $table->char('category_code', 1); // Contoh: H, S, N
+        $table->timestamps();
+    });
     }
 
     /**
@@ -22,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('asset_its');
+        Schema::dropIfExists('asset_categories');
     }
 };

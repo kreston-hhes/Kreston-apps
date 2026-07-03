@@ -45,7 +45,7 @@ class MenuHelper
                 'allowed_divisions' => ['IT'],
 
                 'subItems' => [
-                    ['name' => 'Asset', 'path' => '/asset-it'],
+                    ['name' => 'Asset', 'path' => '/assets'],
                 ],
             ],
 

@@ -201,9 +201,44 @@ both
             </div>
 
             <div class="mb-4">
+                <x-form.date-picker name="single" label="Single" placeholder="Single with required" mode="single"
+                    required />
+            </div>
+            <div class="mb-4">
+                <x-form.date-picker name="rules" label="Rules" placeholder="Single with Rules" mode="single"
+                    altInput="true" altFormat="F d, Y" minDate="2026-06-30" maxDate="2026-07-10" except="['2026-07-05']"
+                    required />
+            </div>
+            <div class="mb-4">
+                <x-form.date-picker name="default" label="Default Date" defaultDate="02-07-2026" />
+            </div>
+            <div class="mb-4">
+                <x-form.date-picker name="multiple" label="Multiple" placeholder="Multiple with default date"
+                    mode="multiple" :defaultDate="['02-07-2026', '05-07-2026', '10-07-2026']" />
+            </div>
+            <div class="mb-4">
+                <x-form.date-picker name="range" label="Range" mode="range" />
+            </div>
+            <div class="mb-4">
+                <x-form.date-picker name="meeting_time" label="Time Mode" enableTime="true" mode="time"
+                    dateFormat="H:i" />
+            </div>
+            <div class="mb-4">
+                <x-form.date-picker name="date_time" label="Date Time Mode" enableTime="true" mode="single"
+                    dateFormat="Y-m-d H:i" />
+            </div>
+
+
+
+            <div class="mb-4">
                 <x-form.checkbox-input name="agree" label="Saya menyetujui syarat dan ketentuan" required
                     requiredMessage="Harap setuju" />
             </div>
+
+            {{-- Edit mode datepicker
+               name="birthday"
+    :value="$user->birthday"
+            --}}
 
 
             {{--
