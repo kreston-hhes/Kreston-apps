@@ -13,9 +13,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Run Docker Compose & Setup Laravel
+      - name: Copy Files & Run Docker Compose
         run: |
+          # Menyalin seluruh file hasil checkout GitHub ke folder proyek utama di server
+          # Sesuaikan nama folder _work jika berbeda, biasanya mengikuti nama repository
+          cp -r . /docker/kreston-apps/
+          
+          # Masuk ke folder utama aplikasi di server
           cd /docker/kreston-apps
+          
+          # Jalankan Docker Compose
           docker compose down
           docker compose up -d --build
           docker exec kreston-apps php artisan config:clear
