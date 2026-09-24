@@ -9,6 +9,7 @@ class AssetType extends Model
     protected $fillable = [
         'category_id',
         'name',
+        'document_flow',
         'type_code',
     ];
 

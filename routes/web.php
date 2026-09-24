@@ -8,6 +8,8 @@ use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AssetController;
+use App\Http\Controllers\HandoverController;
+use App\Http\Controllers\AssetTypeController;
 
 // PUBLIC TICKET DOMAIN
 
@@ -21,6 +23,8 @@ Route::get('/', [PublicTicketController::class, 'index'])
 Route::get('/{ticketNumber}', [PublicTicketController::class, 'checkStatus'])
     ->name('public-ticket.status');
 
+
+
 });
 
 //INTERNAL APPS DOMAIN
@@ -32,7 +36,6 @@ Route::middleware('guest')->group(function () {
     Route::post('/signin', [AuthController::class, 'login']);
 
 
-
     // Forgot Password Routes
     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
     Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
@@ -42,7 +45,7 @@ Route::middleware('guest')->group(function () {
 
 // 2. Rute TERPROTEKSI
 Route::middleware('auth')->group(function () {
-  Route::get('/test-form', [TestController::class, 'index']);
+Route::get('/test-form', [TestController::class, 'index']);
     Route::post('/test-form', [TestController::class, 'store']);
     /*
     |--------------------------------------------------------------------------
@@ -80,10 +83,52 @@ Route::put('/password-update', [DashboardController::class, 'updatePassword'])->
 |
 */
 
-Route::get('/assets', [AssetController::class, 'index'])->name('assets.index');
-Route::post('/assets', [AssetController::class, 'store'])->name('assets.store');
+    // Data Asset Utama
+    // Route untuk fitur Data Aset Utama
+    Route::get('/assets', [AssetController::class, 'index'])->name('assets.index');
+    Route::post('/assets', [AssetController::class, 'store'])->name('assets.store');
+    
+    Route::delete('/it/assets/{id}', [AssetController::class, 'destroy'])->name('assets.destroy');
+    Route::post('/assets/categories', [AssetController::class, 'storeCategory'])->name('assets.categories.store');
+    Route::patch('/it/assets/{id}/qc', [AssetController::class, 'updateQcStatus'])->name('assets.qc.update');
+    // Route::delete('/assets/{id}', [AssetController::class, 'destroy'])->name('assets.destroy');
+
+    // Route khusus untuk form Modal Tambah Kategori Baru, tapi masih bingung sih
+    Route::post('/it/asset-types', [AssetTypeController::class, 'store'])->name('asset-types.store');
+
+    // Surat Penyerahan
+    Route::get('/assets/surat-penyerahan', [HandoverController::class, 'index'])->name('handovers.index');
+    Route::post('/assets/surat-penyerahan', [HandoverController::class, 'store'])->name('handovers.store');
+    Route::get('/assets/surat-penyerahan/pdf', [HandoverController::class, 'printPenyerahan'])->name('handovers.pdf');
+    Route::delete('/assets/surat-penyerahan/{assignment}', [HandoverController::class, 'destroy'])->name('handovers.destroy');
+
+    // Surat Pengembalian
+    Route::get('/assets/surat-pengembalian', [HandoverController::class, 'returnIndex'])->name('handovers.return.index');
+    Route::patch('/assets/surat-pengembalian/{assignment}', [HandoverController::class, 'processReturn'])->name('handovers.return.process');
+    Route::get('/assets/surat-pengembalian/pdf', [HandoverController::class, 'printPengembalian'])->name('handovers.return.pdf');
 
 
+    // Logbook Peminjaman
+    Route::get('/assets/logbook', [App\Http\Controllers\LoanController::class, 'index'])->name('loans.index');
+    Route::post('/assets/logbook', [App\Http\Controllers\LoanController::class, 'store'])->name('loans.store');
+    Route::patch('/assets/logbook/{loan}/selesai', [App\Http\Controllers\LoanController::class, 'finish'])->name('loans.finish');
+    
+
+    // Arsip Surat
+    Route::get('/assets/arsip-surat', [App\Http\Controllers\ArchiveController::class, 'index'])->name('archives.index');
+
+    // Consumable
+    Route::get('/consumables', [App\Http\Controllers\ConsumableController::class, 'index'])->name('consumables.index');
+    Route::post('/consumables', [App\Http\Controllers\ConsumableController::class, 'store'])->name('consumables.store');
+    Route::patch('/consumables/{consumable}', [App\Http\Controllers\ConsumableController::class, 'update'])->name('consumables.update');
+
+    // Billing Bulanan Printer
+    Route::get('/printer-billings', [App\Http\Controllers\PrinterBillingController::class, 'index'])->name('printer-billings.index');
+    Route::post('/printer-billings', [App\Http\Controllers\PrinterBillingController::class, 'store'])->name('printer-billings.store');
+
+    // Invoice
+    Route::get('/invoices', [App\Http\Controllers\InvoiceController::class, 'index'])->name('invoices.index');
+    Route::post('/invoices', [App\Http\Controllers\InvoiceController::class, 'store'])->name('invoices.store');
     /*
 |--------------------------------------------------------------------------
 | Ticket Support

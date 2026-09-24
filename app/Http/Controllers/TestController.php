@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TestController extends Controller
 {
@@ -12,18 +13,19 @@ class TestController extends Controller
             'title' => 'Test Form',
         ]);
     }
-
-public function store(Request $request)
+    public function cetakPdf()
     {
-        $categories = $request->input('category', []);
+        // Data yang akan dikirim ke view
+        $data = [
+            'title' => 'Invoice Pembelian',
+            'date' => date('d/m/Y')
+        ];
 
-        return back()->with('success', [
-            'name' => $request->input('name'),
-            'category' => is_array($categories) ? $categories : [$categories],
-            'kota' => $request->input('kota'),
-            'gender' => $request->input('gender'),
-            'agree' => $request->has('agree') ? 'Yes' : 'No',
-            'permissions' => $request->input('permissions', []),
-        ]);
+        // Load view dan datanya
+        $pdf = Pdf::loadView('test', $data);
+
+        // Pilih salah satu:
+        //return $pdf->download('invoice.pdf'); // Langsung download
+        return $pdf->stream(); // Tampilkan di tab browser (preview)
     }
 }

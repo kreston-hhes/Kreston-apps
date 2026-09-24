@@ -21,14 +21,26 @@
             @foreach ($menuGroups as $groupIndex => $menuGroup)
                 @foreach ($menuGroup['items'] as $itemIndex => $item)
                     @if (isset($item['subItems']))
-                        // Check if any submenu item matches current path
                         @foreach ($item['subItems'] as $subItem)
-                            if (currentPath === '{{ ltrim($subItem['path'], '/') }}' ||
-                                window.location.pathname === '{{ $subItem['path'] }}') {
-                                this.openSubmenus['{{ $groupIndex }}-{{ $itemIndex }}'] = true;
-                            } @endforeach
-            @endif
-            @endforeach
+                            
+                            // JIKA INI MENU TINGKAT 3 (Punya sub-menu lagi, misal: Asset)
+                            @if(isset($subItem['subItems']))
+                                @foreach($subItem['subItems'] as $subSubItem)
+                                    if (currentPath === '{{ ltrim($subSubItem['path'], '/') }}' || window.location.pathname === '{{ $subSubItem['path'] }}') {
+                                        this.openSubmenus['{{ $groupIndex }}-{{ $itemIndex }}'] = true;
+                                    }
+                                @endforeach
+                            
+                            // JIKA MENU TINGKAT 2 BIASA
+                            @else
+                                if (currentPath === '{{ ltrim($subItem['path'], '/') }}' || window.location.pathname === '{{ $subItem['path'] }}') {
+                                    this.openSubmenus['{{ $groupIndex }}-{{ $itemIndex }}'] = true;
+                                }
+                            @endif
+                            
+                        @endforeach
+                    @endif
+                @endforeach
             @endforeach
         },
         toggleSubmenu(groupIndex, itemIndex) {
@@ -91,7 +103,7 @@
                             </template>
                             <template x-if="!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path fill-rule="evenodd" clip-rule="evenodd" d="M5.99915 10.2451C6.96564 10.2451 7.74915 11.0286 7.74915 11.9951V12.0051C7.74915 12.9716 6.96564 13.7551 5.99915 13.7551C5.03265 13.7551 4.24915 12.9716 4.24915 12.0051V11.9951C4.24915 11.0286 5.03265 10.2451 5.99915 10.2451ZM17.9991 10.2451C18.9656 10.2451 19.7491 11.0286 19.7491 11.9951V12.0051C19.7491 12.9716 18.9656 13.7551 17.9991 13.7551C17.0326 13.7551 16.2491 12.9716 16.2491 12.0051V11.9951C16.2491 11.0286 17.0326 10.2451 17.9991 10.2451ZM13.7491 11.9951C13.7491 11.0286 12.9656 10.2451 11.9991 10.2451C11.0326 10.2451 10.2491 11.0286 10.2491 11.9951V12.0051C10.2491 12.9716 11.0326 13.7551 11.9991 13.7551C12.9656 13.7551 13.7491 12.9716 13.7491 12.0051V11.9951Z" fill="currentColor"/>
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M5.99915 10.2451C6.96564 10.2451 7.74915 11.0286 7.74915 11.9951V12.0051C7.74915 12.9716 6.96564 13.7551 5.99915 13.7551C5.03265 13.7551 4.24915 12.9716 4.24915 12.0051V11.9951C4.24915 11.0286 5.03265 10.2451 5.99915 10.2451ZM17.9991 10.2451C18.9656 10.2451 19.7491 11.0286 19.7491 11.9951V12.0051C19.7491 12.9716 18.9656 13.7551 17.9991 13.7551C17.0326 13.7551 16.2491 12.9716 16.2491 12.0051V11.9951C16.2491 11.0286 17.0326 10.2451 17.9991 10.2451ZM13.7491 11.9951C13.7491 11.0286 12.9656 10.2451 11.9991 10.2451C11.0326 10.2451 10.2491 11.0286 10.2491 11.9951V12.0051C10.2491 12.9716 11.0326 13.7551 11.9991 13.7551C12.9656 13.7551 13.7491 12.9716 13.7491 12.0051V11.9951Z" fill="currentColor"/>
                                 </svg>
                             </template>
                         </h2>
@@ -147,35 +159,61 @@
                                         <!-- Submenu -->
                                         <div x-show="isSubmenuOpen({{ $groupIndex }}, {{ $itemIndex }}) && ($store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen)">
                                             <ul class="mt-2 space-y-1 ml-9">
-                                                @foreach ($item['subItems'] as $subItem)
-                                                    <li>
+                                            @foreach ($item['subItems'] as $subItem)
+                                                <li>
+                                                    @if (isset($subItem['subItems']))
+                                                        
+                                                        @php
+                                                            // Mengecek apakah ada sub-menu tingkat 3 yang sedang aktif
+                                                            $isNestedActive = collect($subItem['subItems'])->contains(function($ss) {
+                                                                return request()->is(ltrim($ss['path'], '/'));
+                                                            });
+                                                        @endphp
+                                                        <div x-data="{ openNested: {{ $isNestedActive ? 'true' : 'false' }} }">
+                                                            <button @click="openNested = !openNested" 
+                                                                class="w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors"
+                                                                :class="openNested ? 'text-brand-500 bg-gray-800' : 'text-gray-400 hover:text-white'">
+                                                                
+                                                                <span>{{ $subItem['name'] }}</span>
+                                                                
+                                                                <svg :class="openNested ? 'rotate-180 text-brand-500' : ''" 
+                                                                    class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                                </svg>
+                                                            </button>
+
+                                                            <div x-show="openNested" x-collapse x-cloak>
+                                                                <ul class="mt-1 space-y-1 ml-4 border-l border-gray-700 pl-3">
+                                                                    @foreach ($subItem['subItems'] as $subSubItem)
+                                                                        <li>
+                                                                            <a href="{{ $subSubItem['path'] }}" 
+                                                                                class="block px-3 py-1.5 text-xs rounded-lg transition-colors"
+                                                                                :class="isActive('{{ $subSubItem['path'] }}') ? 'text-brand-500 font-medium' : 'text-gray-500 hover:text-white'">
+                                                                                {{ $subSubItem['name'] }}
+                                                                            </a>
+                                                                        </li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+
+                                                    @else
                                                         <a href="{{ $subItem['path'] }}" class="menu-dropdown-item"
-                                                            :class="isActive('{{ $subItem['path'] }}') ?
-                                                                'menu-dropdown-item-active' :
-                                                                'menu-dropdown-item-inactive'">
+                                                            :class="isActive('{{ $subItem['path'] }}') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
                                                             {{ $subItem['name'] }}
+                                                            
                                                             <span class="flex items-center gap-1 ml-auto">
                                                                 @if (!empty($subItem['new']))
-                                                                    <span
-                                                                        :class="isActive('{{ $subItem['path'] }}') ?
-                                                                            'menu-dropdown-badge menu-dropdown-badge-active' :
-                                                                            'menu-dropdown-badge menu-dropdown-badge-inactive'">
+                                                                    <span :class="isActive('{{ $subItem['path'] }}') ? 'menu-dropdown-badge menu-dropdown-badge-active' : 'menu-dropdown-badge menu-dropdown-badge-inactive'">
                                                                         new
-                                                                    </span>
-                                                                @endif
-                                                                @if (!empty($subItem['pro']))
-                                                                    <span
-                                                                        :class="isActive('{{ $subItem['path'] }}') ?
-                                                                            'menu-dropdown-badge-pro menu-dropdown-badge-pro-active' :
-                                                                            'menu-dropdown-badge-pro menu-dropdown-badge-pro-inactive'">
-                                                                        pro
                                                                     </span>
                                                                 @endif
                                                             </span>
                                                         </a>
-                                                    </li>
-                                                @endforeach
-                                            </ul>
+                                                    @endif
+                                                </li>
+                                            @endforeach
+                                        </ul>
                                         </div>
                                     @else
                                         <!-- Simple Menu Item -->

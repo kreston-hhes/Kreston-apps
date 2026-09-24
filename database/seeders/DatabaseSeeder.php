@@ -11,13 +11,10 @@ use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
-    {
-        // User::factory(10)->create();
-   
+    {$this->call([
+        AssetCategorySeeder::class,
+    ]);
 
 User::create([
             'first_name' => 'Administrator',
@@ -27,7 +24,7 @@ User::create([
             'active' => true, // Sesuai kolom di migrasi kamu
         ]);
 
-   Partnership::create([
+     Partnership::create([
             'nik' => 'EMP-0002',
             'code' => 'PTCP-001',
             'name' => 'PT. Contoh Perusahaan',

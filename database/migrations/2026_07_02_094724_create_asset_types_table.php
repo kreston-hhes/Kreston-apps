@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-       Schema::create('asset_types', function (Blueprint $table) {
+    Schema::create('asset_types', function (Blueprint $table) {
         $table->id();
         // Relasi ke kategori aset
-        $table->foreignId('category_id')->constrained('asset_categories')->onDelete('cascade');
+        $table->foreignId('category_id')->nullable()->constrained('asset_categories')->onDelete('cascade');
         $table->string('name', 50); // Contoh: Laptop, PC Desktop, Router
         $table->char('type_code', 3); // Contoh: LPT, PCX, RTR
         $table->timestamps();
