@@ -1,0 +1,23 @@
+name: CI/CD Deploy to Local Server
+
+on:
+  push:
+    branches:
+      - deploy
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Docker Compose & Setup Laravel
+        run: |
+          cd /docker/kreston-apps
+          docker compose down
+          docker compose up -d --build
+          docker exec kreston-apps php artisan config:clear
+          docker exec kreston-apps php artisan cache:clear
+          docker exec kreston-apps php artisan migrate --force
