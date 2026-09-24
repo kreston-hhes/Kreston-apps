@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      network: host  # <--- Tambahkan baris ini agar proses build ikut network host
+      network: host
     container_name: kreston-apps
     restart: unless-stopped
     network_mode: host
