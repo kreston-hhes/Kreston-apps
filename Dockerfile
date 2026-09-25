@@ -22,11 +22,17 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# SALIN SEMUA FILE PROYEK TERLEBIH DAHULU (agar composer.json terbaca)
+# Salin composer.json dan composer.lock terlebih dahulu (untuk optimasi cache Docker)
+COPY composer.json composer.lock ./
+
+# Jalankan composer install sebelum menyalin seluruh file kode
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+
+# Salin seluruh sisa file proyek Laravel
 COPY . .
 
-# Baru jalankan Composer install setelah file-file project masuk ke container
-RUN composer install --no-dev --optimize-autoloader
+# Selesaikan dump autoloader Composer
+RUN composer dump-autoload --optimize --no-dev
 
 # Berikan izin akses untuk folder storage dan bootstrap cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
