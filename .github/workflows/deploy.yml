@@ -20,8 +20,8 @@ jobs:
           
           # Salin file dengan rsync:
           # --delete: menghapus file di server yang sudah dihapus di git
-          # --exclude: mengabaikan folder .git dan vendor lokal agar tidak ikut tersalin
-          rsync -av --delete --exclude='.git' --exclude='vendor' ./ /docker/kreston-apps/
+          # --exclude: mengabaikan folder .git, vendor, dan actions-runner agar tetap aman
+          rsync -av --delete --exclude='.git' --exclude='vendor' --exclude='actions-runner' ./ /docker/kreston-apps/
           
           # Masuk ke folder utama aplikasi di server
           cd /docker/kreston-apps
