@@ -37,5 +37,6 @@ RUN composer dump-autoload --optimize --no-dev
 # Berikan izin akses untuk folder storage dan bootstrap cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Jalankan PHP built-in server pada port 8000
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+# Jalankan PHP built-in server yang stabil pada port 8000
+EXPOSE 8000
+CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]
