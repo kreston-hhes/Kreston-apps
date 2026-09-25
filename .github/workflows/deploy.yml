@@ -15,9 +15,11 @@ jobs:
 
       - name: Copy Files & Run Docker Compose
         run: |
-          # Menyalin seluruh file hasil checkout GitHub ke folder proyek utama di server
-          # Sesuaikan nama folder _work jika berbeda, biasanya mengikuti nama repository
-          cp -r . /docker/kreston-apps/
+          # Buat folder /docker/kreston-apps jika belum ada
+          mkdir -p /docker/kreston-apps
+          
+          # Salin semua file KECUALI folder .git agar tidak kena permission denied
+          rsync -av --exclude='.git' ./ /docker/kreston-apps/
           
           # Masuk ke folder utama aplikasi di server
           cd /docker/kreston-apps
