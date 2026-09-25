@@ -13,11 +13,24 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Run Docker Compose & Setup Laravel
+      - name: Copy Files & Run Docker Compose
         run: |
+          # Buat folder /docker/kreston-apps jika belum ada
+          mkdir -p /docker/kreston-apps
+          
+          # Salin file dengan rsync:
+          # --delete: menghapus file di server yang sudah dihapus di git
+          # --exclude: mengabaikan folder .git, vendor, dan actions-runner agar tetap aman
+          rsync -av --delete --exclude='.git' --exclude='vendor' --exclude='actions-runner' ./ /docker/kreston-apps/
+          
+          # Masuk ke folder utama aplikasi di server
           cd /docker/kreston-apps
+          
+          # Jalankan Docker Compose
           docker compose down
           docker compose up -d --build
+          
+          # Jalankan perintah Artisan (pastikan container sudah siap)
           docker exec kreston-apps php artisan config:clear
           docker exec kreston-apps php artisan cache:clear
           docker exec kreston-apps php artisan migrate --force
