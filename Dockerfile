@@ -1,42 +1,53 @@
-FROM php:8.2-fpm
+FROM php:8.3-cli
 
-# Install dependencies sistem
 RUN apt-get update && apt-get install -y \
     git \
+    unzip \
     curl \
+    libzip-dev \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
+    && docker-php-ext-install \
+    pdo_mysql \
+    mbstring \
+    bcmath \
+    gd \
     zip \
-    unzip
+    && rm -rf /var/lib/apt/lists/*
 
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+COPY --from=node:22 /usr/local/bin/node /usr/local/bin/node
+COPY --from=node:22 /usr/local/lib/node_modules /usr/local/lib/node_modules
 
-# Get latest Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
 
-# Set working directory
-WORKDIR /var/www/html
+WORKDIR /var/www
 
-# Salin composer.json dan composer.lock terlebih dahulu (untuk optimasi cache Docker)
-COPY composer.json composer.lock ./
-
-# Jalankan composer install sebelum menyalin seluruh file kode
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
-
-# Salin seluruh sisa file proyek Laravel
+# SALIN SELURUH PROJECT DI AWAL 
+# (Agar file artisan, routes, dan config lengkap sebelum composer install & npm build)
 COPY . .
 
-# Selesaikan dump autoloader Composer
-RUN composer dump-autoload --optimize --no-dev
+# Jalankan composer install
+RUN composer install \
+    --no-interaction \
+    --prefer-dist \
+    --optimize-autoloader \
+    --no-dev
 
-# Berikan izin akses untuk folder storage dan bootstrap cache
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Jalankan npm dependencies & build Tailwind
+RUN npm ci
+RUN npm run build
 
-# Jalankan PHP built-in server yang stabil pada port 8000
+# Bersihkan cache artisan
+RUN php artisan config:clear || true
+RUN php artisan route:clear || true
+RUN php artisan view:clear || true
+
+RUN chmod -R 775 storage bootstrap/cache
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
 EXPOSE 8000
-CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]
+
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

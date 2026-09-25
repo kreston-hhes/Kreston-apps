@@ -1,5 +1,5 @@
 services:
-  kreston-app:
+  laravel:
     build:
       context: .
       dockerfile: Dockerfile
@@ -7,9 +7,5 @@ services:
     container_name: kreston-apps
     restart: unless-stopped
     network_mode: host
-    working_dir: /var/www/html
-    volumes:
-      - .:/var/www/html
-    environment:
-      - APP_ENV=production
-      - APP_DEBUG=false
+    env_file:
+      - .env

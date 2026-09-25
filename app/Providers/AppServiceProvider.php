@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use App\Observers\AssetObserver;
 use App\Models\Asset;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,5 +25,9 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);//
         Asset::observe(AssetObserver::class);
+
+	if (config('app.env') === 'production') {
+        URL::forceScheme('https');
+    	}
     }
 }
