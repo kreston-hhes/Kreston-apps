@@ -1,5 +1,9 @@
 services:
+<<<<<<< HEAD
   laravel:
+=======
+  kreston-app:
+>>>>>>> c31107457c5142baa723e2803750cd532a04517f
     build:
       context: .
       dockerfile: Dockerfile
@@ -7,5 +11,14 @@ services:
     container_name: kreston-apps
     restart: unless-stopped
     network_mode: host
+<<<<<<< HEAD
     env_file:
       - .env
+=======
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+>>>>>>> c31107457c5142baa723e2803750cd532a04517f
