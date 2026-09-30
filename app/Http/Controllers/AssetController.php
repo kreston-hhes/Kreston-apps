@@ -7,9 +7,24 @@ use App\Models\AssetCategory;
 use App\Models\Partnership;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\AssetsImport;
 
 class AssetController extends Controller
 {
+    public function importExcel(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'file_excel' => 'required|mimes:xlsx,xls,csv'
+        ]);
+
+        try {
+            Excel::import(new AssetsImport, $request->file('file_excel'));
+            return redirect()->back()->with('success', 'Ratusan data aset berhasil di-import dari Excel!');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Gagal import: ' . $e->getMessage()]);
+        }
+    }
     public function index(Request $request)
     {
         $query = Asset::with([

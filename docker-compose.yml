@@ -1,0 +1,11 @@
+services:
+  laravel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      network: host
+    container_name: kreston-apps
+    restart: unless-stopped
+    network_mode: host
+    env_file:
+      - .env

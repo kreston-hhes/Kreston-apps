@@ -172,23 +172,27 @@
                                                         <div x-data="{ openNested: {{ $isNestedActive ? 'true' : 'false' }} }">
                                                             <button @click="openNested = !openNested" 
                                                                 class="w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors"
-                                                                :class="openNested ? 'text-brand-500 bg-gray-800' : 'text-gray-400 hover:text-white'">
+                                                                :class="openNested 
+                                                                    ? 'text-brand-500 bg-brand-50/50 dark:bg-gray-800' 
+                                                                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800'">
                                                                 
-                                                                <span>{{ $subItem['name'] }}</span>
+                                                                <span class="font-medium">{{ $subItem['name'] }}</span>
                                                                 
-                                                                <svg :class="openNested ? 'rotate-180 text-brand-500' : ''" 
+                                                                <svg :class="openNested ? 'rotate-180 text-brand-500' : 'text-gray-400'" 
                                                                     class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                                                 </svg>
                                                             </button>
 
                                                             <div x-show="openNested" x-collapse x-cloak>
-                                                                <ul class="mt-1 space-y-1 ml-4 border-l border-gray-700 pl-3">
+                                                                <ul class="mt-1 space-y-1 ml-4 border-l border-gray-200 dark:border-gray-700 pl-3">
                                                                     @foreach ($subItem['subItems'] as $subSubItem)
                                                                         <li>
                                                                             <a href="{{ $subSubItem['path'] }}" 
                                                                                 class="block px-3 py-1.5 text-xs rounded-lg transition-colors"
-                                                                                :class="isActive('{{ $subSubItem['path'] }}') ? 'text-brand-500 font-medium' : 'text-gray-500 hover:text-white'">
+                                                                                :class="isActive('{{ $subSubItem['path'] }}') 
+                                                                                    ? 'text-brand-500 font-semibold' 
+                                                                                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800'">
                                                                                 {{ $subSubItem['name'] }}
                                                                             </a>
                                                                         </li>
@@ -198,13 +202,20 @@
                                                         </div>
 
                                                     @else
-                                                        <a href="{{ $subItem['path'] }}" class="menu-dropdown-item"
-                                                            :class="isActive('{{ $subItem['path'] }}') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive'">
+                                                        <a href="{{ $subItem['path'] }}" 
+                                                            class="flex items-center w-full px-3 py-2 text-sm rounded-lg transition-colors"
+                                                            :class="isActive('{{ $subItem['path'] }}') 
+                                                                ? 'text-brand-500 font-medium bg-brand-50/50 dark:bg-gray-800' 
+                                                                : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800'">
+                                                            
                                                             {{ $subItem['name'] }}
                                                             
                                                             <span class="flex items-center gap-1 ml-auto">
                                                                 @if (!empty($subItem['new']))
-                                                                    <span :class="isActive('{{ $subItem['path'] }}') ? 'menu-dropdown-badge menu-dropdown-badge-active' : 'menu-dropdown-badge menu-dropdown-badge-inactive'">
+                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold transition-colors"
+                                                                        :class="isActive('{{ $subItem['path'] }}') 
+                                                                            ? 'bg-brand-500 text-white' 
+                                                                            : 'bg-brand-100 text-brand-600 dark:bg-brand-500/20 dark:text-brand-400'">
                                                                         new
                                                                     </span>
                                                                 @endif

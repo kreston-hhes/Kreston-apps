@@ -18,6 +18,7 @@
         // Tab Management
         activeTab: '{{ request('tab', 'all') }}',
         isModalOpen: false,
+        isImportModalOpen: false,
         detailAset: null,
         
         // Data assets dari backend
@@ -202,7 +203,13 @@
                             <a href="{{ route('assets.index') }}" class="text-sm text-red-500 hover:text-red-700">Clear</a>
                         @endif
                     </form>
-
+                    <button @click="isImportModalOpen = true"
+                        class="inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors">
+                        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        Import Excel
+                    </button>
                     <button @click="$dispatch('open-modal', 'modal-add-asset')"
                         class="inline-flex justify-center items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
                         <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -786,6 +793,39 @@
             </div>
         </form>
     </x-modal>
+
+    <!-- MODAL IMPORT EXCEL -->
+    <div x-show="isImportModalOpen" x-cloak
+        class="fixed inset-0 z-[9999] overflow-y-auto p-4 pt-10 sm:p-8 sm:pt-16">
+        <div x-show="isImportModalOpen" x-transition.opacity class="fixed inset-0 bg-black/40" @click="isImportModalOpen = false"></div>
+
+        <div x-show="isImportModalOpen"
+            class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg mx-auto my-4 sm:my-8 p-6 text-left">
+            
+            <div class="flex items-center justify-between mb-5 pb-3 border-b border-gray-100 dark:border-gray-700">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Import Data Aset</h3>
+                <button @click="isImportModalOpen = false" class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <form action="{{ route('assets.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="mb-4">
+                    <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Pilih File Excel (.xlsx, .csv)</label>
+                    <input type="file" name="file_excel" accept=".xlsx, .xls, .csv" required
+                        class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400">
+                </div>
+                <div class="text-xs text-gray-500 mb-6 dark:text-gray-400">
+                    <p>Pastikan format baris pertama Excel (header) sama persis dengan:</p>
+                    <code class="block mt-1 p-2 bg-gray-100 dark:bg-gray-900 rounded">kategori_id, nama_perangkat, serial_number, merk, tipe</code>
+                </div>
+                <button type="submit" class="w-full px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors">
+                    Mulai Import
+                </button>
+            </form>
+        </div>
+    </div>
 
     <!-- MODAL 2: FORM KATEGORI BARU -->
     <x-modal name="modal-add-category" title="Kategori Baru" maxWidth="sm">

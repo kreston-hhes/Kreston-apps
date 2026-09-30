@@ -95,7 +95,8 @@ Route::put('/password-update', [DashboardController::class, 'updatePassword'])->
 
     // Route khusus untuk form Modal Tambah Kategori Baru, tapi masih bingung sih
     Route::post('/it/asset-types', [AssetTypeController::class, 'store'])->name('asset-types.store');
-
+    //Route import excel
+    Route::post('/assets/import', [App\Http\Controllers\AssetController::class, 'importExcel'])->name('assets.import');
     // Surat Penyerahan
     Route::get('/assets/surat-penyerahan', [HandoverController::class, 'index'])->name('handovers.index');
     Route::post('/assets/surat-penyerahan', [HandoverController::class, 'store'])->name('handovers.store');
